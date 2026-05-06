@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "gpio.h"
 #include "fsmc.h"
 
@@ -25,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include "lcd.h"
 #include "key_led.h"
+#include "servo_motor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +47,14 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t servo1_angle = 90;
+uint8_t servo2_angle = 90;
+uint8_t servo3_angle = 90;
 
+// value 0:add angle , value 1:subtract angle
+uint8_t k0_direction = 0;
+uint8_t k1_direction = 0;
+uint8_t k2_direction = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -88,12 +97,14 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_FSMC_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   DWT_Init(); // 初始化DWT
 
   Key_Init();
   Led_Init();
   lcd_init();
+  ServoMotor_Init();
   
   lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
   lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
@@ -102,26 +113,88 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
     KeyPressedID key_id = KEY_None;
+    uint8_t key_value = 0;
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    key_id = Key_Scan();
-    if(key_id == KEY0_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
-        Led_Toggle(LED1);
-    }
-    else if(key_id == KEY1_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
-        Led_Toggle(LED2);
-    }
-    else if(key_id == KEY2_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
-        Led_Toggle(LED1);
-        Led_Toggle(LED2);
-    }  
-  }
+    // key_id = Key_Scan();
+    // if(key_id == KEY0_Pressed){
+    //     lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
+    //     Led_Toggle(LED1);
+    // }
+    // else if(key_id == KEY1_Pressed){
+    //     lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
+    //     Led_Toggle(LED2);
+    // }
+    // else if(key_id == KEY2_Pressed){
+    //     lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
+    //     Led_Toggle(LED1);
+    //     Led_Toggle(LED2);
+    // }  
+    key_value = Key_Scan();
+    if(key_value != 0){
+        if(key_value == KEY0_Pressed){
+            
+            HAL_GPIO_TogglePin(GPIOE, LED1_Pin);
+            if(k0_direction == 0){
+                servo1_angle += 10;
+            }
+            else{
+                servo1_angle -= 10;
+            }
+            //if angle is out of range, reverse the direction,then subtract the angle
+            if(servo1_angle >= 180){
+                servo1_angle = 180;
+                k0_direction = 1;
+            }
+            else if(servo1_angle <= 0){
+                servo1_angle = 0;
+                k0_direction = 0;
+            }
+            ServoMotor_SetAngle(1, servo1_angle);
+
+        }
+        else if(key_value == KEY1_Pressed){
+            HAL_GPIO_TogglePin(GPIOE, LED2_Pin);
+            if(k1_direction == 0){
+                servo2_angle += 10;
+            }
+            else{
+                servo2_angle -= 10;
+            }
+            if(servo2_angle >= 180){
+                servo2_angle = 180;
+                k1_direction = 1;
+            }
+            else if(servo2_angle <= 0){
+                servo2_angle = 0;
+                k1_direction = 0;
+            }
+            ServoMotor_SetAngle(2, servo2_angle);
+          }
+        else if(key_value == KEY2_Pressed){
+            HAL_GPIO_TogglePin(GPIOE, LED1_Pin|LED2_Pin);
+            if(k2_direction == 0){
+                servo3_angle += 10;
+            }
+            else{
+                servo3_angle -= 10;
+            }
+            if(servo3_angle >= 180){
+                servo3_angle = 180;
+                k2_direction = 1;
+            }
+            else if(servo3_angle <= 0){
+                servo3_angle = 0;
+                k2_direction = 0;
+            }
+            ServoMotor_SetAngle(3, servo3_angle);
+          }
+        }
+			}
+    HAL_Delay(10);
   /* USER CODE END 3 */
 }
 

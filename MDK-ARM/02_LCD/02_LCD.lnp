@@ -3,6 +3,7 @@
 "02_lcd\main.o"
 "02_lcd\gpio.o"
 "02_lcd\fsmc.o"
+"02_lcd\tim.o"
 "02_lcd\stm32f4xx_it.o"
 "02_lcd\stm32f4xx_hal_msp.o"
 "02_lcd\stm32f4xx_ll_fsmc.o"
@@ -26,6 +27,7 @@
 "02_lcd\delay.o"
 "02_lcd\key_led.o"
 "02_lcd\lcd.o"
+"02_lcd\servo_motor.o"
 --strict --scatter "02_LCD\02_LCD.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
