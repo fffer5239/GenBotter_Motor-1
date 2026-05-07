@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "gpio.h"
 #include "fsmc.h"
 
@@ -25,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include "lcd.h"
 #include "key_led.h"
+#include "brush_motor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,6 +67,7 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -88,6 +91,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_FSMC_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   DWT_Init(); // 初始化DWT
 
@@ -102,6 +106,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
     KeyPressedID key_id = KEY_None;
+    int duty = 0; //-100 ~ 100, 0 is stop
   while (1)
   {
     /* USER CODE END WHILE */
@@ -111,16 +116,44 @@ int main(void)
     if(key_id == KEY0_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
         Led_Toggle(LED1);
+        duty += 10;
+        if(duty > 100){
+            duty = 100;
+        }
     }
     else if(key_id == KEY1_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
         Led_Toggle(LED2);
+        duty -= 10;
+        if(duty < -100){
+            duty = -100;
+        }
     }
     else if(key_id == KEY2_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
         Led_Toggle(LED1);
         Led_Toggle(LED2);
+        duty = 0;
     }  
+
+
+    if(duty == 0){
+      BrushMotor_Stop();
+    }
+    else if(duty < 0) //backward
+    {
+      BrushMotor_SetDirection(1);
+      BrushMotor_SetSpeed(abs(duty));
+      BrushMotor_Enable();
+
+    }
+    else if(duty > 0) //forward
+    {
+      BrushMotor_SetDirection(0);
+      BrushMotor_SetSpeed(duty);
+      BrushMotor_Enable();  
+    }
+
   }
   /* USER CODE END 3 */
 }
@@ -189,8 +222,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
