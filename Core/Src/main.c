@@ -58,7 +58,20 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+BrushMotorConfig pm2_motor = {
+    .htim = &htim8, // 使用TIM1作为电机控制定时器
+    .tim_channel = TIM_CHANNEL_1, // 使用通道1
+    .tim_arr = 1000, // 自动重装载值，假设为1000
+    .sd_port = PM2_SD_GPIO_Port, // 假设IR2104使能引脚连接到GPIOA
+    .sd_pin = PM2_SD_Pin // 假设使能引脚为PA5
+};
+BrushMotorConfig pm1_motor = {
+    .htim = &htim1, // 使用TIM1作为电机控制定时器
+    .tim_channel = TIM_CHANNEL_1, // 使用通道1
+    .tim_arr = 1000, // 自动重装载值，假设为1000
+    .sd_port = PM1_SD_GPIO_Port, // 假设IR2104使能引脚连接到GPIOA
+    .sd_pin = PM1_SD_Pin // 假设使能引脚为PA5
+};
 /* USER CODE END 0 */
 
 /**
@@ -92,6 +105,7 @@ int main(void)
   MX_GPIO_Init();
   MX_FSMC_Init();
   MX_TIM1_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   DWT_Init(); // 初始化DWT
 
@@ -101,58 +115,67 @@ int main(void)
   
   lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
   lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
+
+  // BrushMotor_Init(&pm1_motor); // 初始化电机控制器
+  BrushMotor_Init(&pm2_motor); // 初始化电机控制器
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-    KeyPressedID key_id = KEY_None;
     int duty = 0; //-100 ~ 100, 0 is stop
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    key_id = Key_Scan();
-    if(key_id == KEY0_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
-        Led_Toggle(LED1);
-        duty += 10;
-        if(duty > 100){
-            duty = 100;
-        }
-    }
-    else if(key_id == KEY1_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
-        Led_Toggle(LED2);
-        duty -= 10;
-        if(duty < -100){
-            duty = -100;
-        }
-    }
-    else if(key_id == KEY2_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
-        Led_Toggle(LED1);
-        Led_Toggle(LED2);
-        duty = 0;
-    }  
 
-
-    if(duty == 0){
-      BrushMotor_Stop();
+    uint8_t key_state = Key_Scan(); // 扫描按键状
+    if (key_state == 1)
+    {                       // key0按下
+      lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
+      Led_Toggle(LED1);
+      duty += 10;           // 增加电机转
+      if (duty > 100)
+      {
+        duty = 100; // 如果超过100，则变为100，表示全速正转
+      }
     }
-    else if(duty < 0) //backward
+    else if (key_state == 2)
+    {                       // key1按下
+      lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
+      Led_Toggle(LED2);
+      duty -= 10;           // 减少电机转
+      if (duty < -100)
+      {
+        duty = -100; // 如果小于-100，则变为-100，表示全速反
+      }
+    }
+    else if (key_state == 3)
+    {                       // key2按下
+      lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
+      Led_Toggle(LED1);
+      Led_Toggle(LED2);
+      duty = 0;             // 停止电机
+    }
+
+    lcd_show_num(10, 150, abs(duty), 3, 24, BLUE);
+    if (duty == 0)
     {
-      BrushMotor_SetDirection(1);
-      BrushMotor_SetSpeed(abs(duty));
-      BrushMotor_Enable();
-
+      BrushMotor_Stop(); // 停止电机
     }
-    else if(duty > 0) //forward
+    else if (duty < 0)
     {
-      BrushMotor_SetDirection(0);
-      BrushMotor_SetSpeed(duty);
-      BrushMotor_Enable();  
+      BrushMotor_SetDirection(MOTOR_REVERSE);     // 反转
+      BrushMotor_SetSpeed(abs(duty)); // 设置电机速度
+      BrushMotor_Enable();            // 启动电机
     }
+    else if (duty > 0)
+    {
+      BrushMotor_SetDirection(MOTOR_FORWARD); // 正转
+      BrushMotor_SetSpeed(duty);  // 设置电机速度
+      BrushMotor_Enable();        // 启动电机
+    }
+
 
   }
   /* USER CODE END 3 */
