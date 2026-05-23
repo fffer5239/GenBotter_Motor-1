@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "gpio.h"
 #include "fsmc.h"
 
@@ -25,6 +26,8 @@
 /* USER CODE BEGIN Includes */
 #include "lcd.h"
 #include "key_led.h"
+#include "bldc_motor.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,6 +68,7 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -88,13 +92,16 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_FSMC_Init();
+  MX_TIM1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   DWT_Init(); // 初始化DWT
 
   Key_Init();
   Led_Init();
   lcd_init();
-  
+  BLDC_Init(&htim1);
+  HAL_TIM_Base_Start_IT(&htim2);
   lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
   lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
   /* USER CODE END 2 */
@@ -110,18 +117,31 @@ int main(void)
     key_id = Key_Scan();
     if(key_id == KEY0_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
-        Led_Toggle(LED1);
+        BLDC_SetState(BLDC_STEP, BLDC_CW);
     }
     else if(key_id == KEY1_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
-        Led_Toggle(LED2);
+        BLDC_SetState(BLDC_STEP, BLDC_CCW);
     }
     else if(key_id == KEY2_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
-        Led_Toggle(LED1);
-        Led_Toggle(LED2);
+        BLDC_SetState(BLDC_RUN, BLDC_CW);
     }  
-  }
+
+    if(BLDC_GetState() == BLDC_RUN){
+      Led_On(LED1);
+    }
+    else{
+      Led_Off(LED1);
+    }
+
+    if(BLDC_GetDir() ==  BLDC_CW){
+      Led_On(LED2);
+    }
+    else{
+      Led_Off(LED2);
+    }
+	}
   /* USER CODE END 3 */
 }
 
@@ -189,8 +209,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
