@@ -3,7 +3,7 @@
 <title>Static Call Graph - [02_LCD\02_LCD.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image 02_LCD\02_LCD.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sat May 23 15:40:04 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sun May 24 11:39:03 2026
 <BR><P>
 <H3>Maximum Stack Usage =        224 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -583,11 +583,11 @@ Global Symbols
 
 <P><STRONG><a name="[110]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[dd]"></a>BLDC_GetDir</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, bldc_motor.o(i.BLDC_GetDir))
+<P><STRONG><a name="[dc]"></a>BLDC_GetDir</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, bldc_motor.o(i.BLDC_GetDir))
 <BR><BR>[Called By]<UL><LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[dc]"></a>BLDC_GetState</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, bldc_motor.o(i.BLDC_GetState))
+<P><STRONG><a name="[dd]"></a>BLDC_GetState</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, bldc_motor.o(i.BLDC_GetState))
 <BR><BR>[Called By]<UL><LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -1346,7 +1346,7 @@ Global Symbols
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_ex_nt35510_reginit
 </UL>
 
-<P><STRONG><a name="[6c]"></a>main</STRONG> (Thumb, 250 bytes, Stack size 16 bytes, main.o(i.main))
+<P><STRONG><a name="[6c]"></a>main</STRONG> (Thumb, 262 bytes, Stack size 16 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 224<LI>Call Chain = main &rArr; lcd_init &rArr; MX_FSMC_Init &rArr; HAL_SRAM_Init &rArr; HAL_SRAM_MspInit &rArr; HAL_FSMC_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_show_string
@@ -1365,8 +1365,8 @@ Global Symbols
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DWT_Init
 <LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_SetState
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_Init
-<LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_GetState
-<LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_GetDir
+<LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_GetState
+<LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BLDC_GetDir
 <LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry_main

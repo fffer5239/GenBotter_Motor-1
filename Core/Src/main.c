@@ -125,7 +125,12 @@ int main(void)
     }
     else if(key_id == KEY2_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
-        BLDC_SetState(BLDC_RUN, BLDC_CW);
+        if(BLDC_GetDir() == BLDC_CW){
+          BLDC_SetState(BLDC_RUN, BLDC_CW);
+        }
+        else{
+          BLDC_SetState(BLDC_RUN, BLDC_CCW);
+        }
     }  
 
     if(BLDC_GetState() == BLDC_RUN){
