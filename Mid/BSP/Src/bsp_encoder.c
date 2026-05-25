@@ -69,11 +69,11 @@ void BSP_Encoder_Init(void)
     encoders[ENCODER_PM2].overflow_count = 0;
     encoders[ENCODER_PM2].rpm = 0.0f;
 
-    // 启动速度计算定时器（50ms中断）
-    if (IsTimerValid(&htim6))
-    {
-        HAL_TIM_Base_Start_IT(&htim6);
-    }
+    // // 启动速度计算定时器（50ms中断）
+    // if (IsTimerValid(&htim6))
+    // {
+    //     HAL_TIM_Base_Start_IT(&htim6);
+    // }
 
 }
 
