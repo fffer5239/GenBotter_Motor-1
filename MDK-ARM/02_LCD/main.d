@@ -32,7 +32,9 @@
 02_lcd\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 02_lcd\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 02_lcd\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
+02_lcd\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 02_lcd\main.o: ../Core/Inc/tim.h
+02_lcd\main.o: ../Core/Inc/usart.h
 02_lcd\main.o: ../Core/Inc/gpio.h
 02_lcd\main.o: ../Core/Inc/fsmc.h
 02_lcd\main.o: ../Mid/BSP/Inc/lcd.h
@@ -40,3 +42,5 @@
 02_lcd\main.o: ../Mid/BSP/Inc/delay.h
 02_lcd\main.o: ../Mid/BSP/Inc/key_led.h
 02_lcd\main.o: ../Mid/BSP/Inc/brush_motor.h
+02_lcd\main.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\stdio.h
+02_lcd\main.o: ../Mid/BSP/Inc/bsp_encoder.h

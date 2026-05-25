@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 #include "fsmc.h"
 
@@ -27,6 +28,9 @@
 #include "lcd.h"
 #include "key_led.h"
 #include "brush_motor.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include "bsp_encoder.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -106,6 +110,9 @@ int main(void)
   MX_FSMC_Init();
   MX_TIM1_Init();
   MX_TIM8_Init();
+  MX_TIM3_Init();
+  MX_TIM6_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   DWT_Init(); // 初始化DWT
 
@@ -113,68 +120,104 @@ int main(void)
   Led_Init();
   lcd_init();
   
-  lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
-  lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
+  lcd_show_string(100, 10, 300, 32, 32, "Dr.GAO-Motor-1", RED);
+  lcd_show_string(10, 60, 450, 24, 24, "Chap08: Brushed_Motor_Sensing", BLUE);
 
-  // BrushMotor_Init(&pm1_motor); // 初始化电机控制器
-  BrushMotor_Init(&pm2_motor); // 初始化电机控制器
+  BSP_Encoder_Init(); // 初始化编码器模块
+  // 根据实际使用的编码器进行启动
+  BSP_Encoder_Start(ENCODER_PM1); // 启动PM1编码器
+  BrushMotor_Init(&pm1_motor);
+  BSP_Encoder_Start(ENCODER_PM1); // 若编码器计数停止，启动编码器
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-    int duty = 0; //-100 ~ 100, 0 is stop
+  KeyPressedID key_id = KEY_None;
+  int duty = 0;
+  uint16_t send_temp = 0;
+  char buffer[50];
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
-    uint8_t key_state = Key_Scan(); // 扫描按键状
-    if (key_state == 1)
-    {                       // key0按下
-      lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
+   key_id = Key_Scan();
+    if (key_id == KEY0_Pressed)
+    {
+      lcd_show_string(10, 90, 200, 24, 24, "key 0 pressed.", BLUE);
       Led_Toggle(LED1);
-      duty += 10;           // 增加电机转
+      duty += 10;
       if (duty > 100)
       {
-        duty = 100; // 如果超过100，则变为100，表示全速正转
+        duty = 100;
       }
     }
-    else if (key_state == 2)
-    {                       // key1按下
-      lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
+    else if (key_id == KEY1_Pressed)
+    {
+      lcd_show_string(10, 90, 200, 24, 24, "key 1 pressed.", BLUE);
       Led_Toggle(LED2);
-      duty -= 10;           // 减少电机转
+
+      duty -= 10;
       if (duty < -100)
       {
-        duty = -100; // 如果小于-100，则变为-100，表示全速反
+        duty = -100;
       }
     }
-    else if (key_state == 3)
-    {                       // key2按下
-      lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
+    else if (key_id == KEY2_Pressed)
+    {
+      lcd_show_string(10, 90, 200, 24, 24, "key 2 pressed.", BLUE);
       Led_Toggle(LED1);
       Led_Toggle(LED2);
-      duty = 0;             // 停止电机
-    }
+      duty = 0;
+      BSP_Encoder_Stop(ENCODER_PM1); // 停止编码器计数
+    }else{
+      lcd_show_string(10, 90, 200, 24, 24, "No key pressed.", BLUE);
+		}
 
-    lcd_show_num(10, 150, abs(duty), 3, 24, BLUE);
     if (duty == 0)
     {
       BrushMotor_Stop(); // 停止电机
     }
     else if (duty < 0)
     {
-      BrushMotor_SetDirection(MOTOR_REVERSE);     // 反转
-      BrushMotor_SetSpeed(abs(duty)); // 设置电机速度
-      BrushMotor_Enable();            // 启动电机
+      if (!BSP_Encoder_IsRunning(ENCODER_PM1))
+      {
+        BSP_Encoder_Start(ENCODER_PM1); // 若编码器计数停止，启动编码器
+      }
+      BrushMotor_SetDirection(MOTOR_REVERSE); // 反转
+      BrushMotor_SetSpeed(abs(duty));         // 设置电机速度
+      BrushMotor_Enable();                    // 启动电机
     }
     else if (duty > 0)
     {
+      if (!BSP_Encoder_IsRunning(ENCODER_PM1))
+      {
+        BSP_Encoder_Start(ENCODER_PM1); // 若编码器计数停止，启动编码器
+      }
       BrushMotor_SetDirection(MOTOR_FORWARD); // 正转
-      BrushMotor_SetSpeed(duty);  // 设置电机速度
-      BrushMotor_Enable();        // 启动电机
+      BrushMotor_SetSpeed(duty);              // 设置电机速度
+      BrushMotor_Enable();                    // 启动电机
     }
+
+    sprintf(buffer, "PWM Duty: %d   ", duty);
+    lcd_show_string(10, 120, 200, 24, 24, buffer, BLUE);
+
+    /*测速代码*/
+    // 读取编码器数据
+    int32_t count1 = BSP_Encoder_GetCount(ENCODER_PM1);
+    float rpm1 = BSP_Encoder_GetSpeedRPM(ENCODER_PM1);
+    sprintf(buffer, "PM1_Pulses: %ld, RPM: %.1f   ", (long)count1, rpm1);
+    lcd_show_string(10, 150, 400, 24, 24, buffer, BLUE);
+
+    // HAL_Delay(50);
+    // send_temp++;
+    // if (send_temp % 10 == 0)
+    // {
+    //   sprintf(buffer, "PM1_Pulses: %ld, RPM: %.2f\r\n", (long)count1, rpm1);
+    //   USART_SendString(buffer);
+    //   send_temp = 0;
+    // }
 
 
   }
@@ -228,6 +271,28 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+int32_t timcount1 = 0;
+char buffer1[50];
+int32_t timcount2 = 0;
+char buffer2[50];
+// 中断回调函数
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim->Instance == TIM3 || htim->Instance == TIM2)
+  {
+    timcount1++;
+    sprintf(buffer1, "TIM Count1: %d   ", timcount1);
+    lcd_show_string(10, 180, 400, 24, 24, buffer1, BLUE);
+    BSP_Encoder_HandleOverflow(htim);
+  }
+  else if (htim->Instance == TIM6)
+  {
+    timcount2++;
+    sprintf(buffer2, "TIM Count2: %d   ", timcount2);
+    lcd_show_string(10, 220, 400, 24, 24, buffer2, BLUE);
+    BSP_Encoder_UpdateSpeed();
+  }
+}
 
 /* USER CODE END 4 */
 
