@@ -53,7 +53,7 @@ void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 2;
   hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -66,6 +66,15 @@ void MX_ADC1_Init(void)
   sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Rank = 2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -91,8 +100,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**ADC1 GPIO Configuration
     PB0     ------> ADC1_IN8
+    PB1     ------> ADC1_IN9
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -138,8 +148,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
     /**ADC1 GPIO Configuration
     PB0     ------> ADC1_IN8
+    PB1     ------> ADC1_IN9
     */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0|GPIO_PIN_1);
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(adcHandle->DMA_Handle);
@@ -160,16 +171,18 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
  */
 void adc_calculate_filtered(float *filtered_data)
 {
-    uint32_t sum = 0; // 累加原始值（防止溢出）
+    uint32_t sum_ch8 = 0; // 用于存放ADC1通道8的采样值之和
+    uint32_t sum_ch9 = 0; // 用于存放ADC1通道9的采样值之和
     int i;
     for (i = 0; i < ADC_SAMPLE_COUNT; i++)
     {
-        sum += adc_raw_data[i]; // 累加单通道的所有采样值
+        sum_ch8 += adc_raw_data[i * ADC_CHANNEL_NUM];       // 通道8数据
+        sum_ch9 += adc_raw_data[i * ADC_CHANNEL_NUM + 1];   // 通道9数据
     }
     // 浮点除法，保留小数部分（核心优化点）
-    filtered_data[0] = (float)sum / ADC_SAMPLE_COUNT;
+    filtered_data[0] = (float)sum_ch8 / ADC_SAMPLE_COUNT;
+    filtered_data[1] = (float)sum_ch9 / ADC_SAMPLE_COUNT;
 }
-
 /**
  * @brief  ADC转换完成回调函数（DMA传输完成后触发）
  * @note   执行滤波计算，更新滤波后的数据

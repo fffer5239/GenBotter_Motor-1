@@ -34,6 +34,8 @@
 #include <stdio.h>
 #include "bsp_encoder.h"
 #include "bsp_current_sensor.h"
+#include "bsp_voltage_sensor.h"
+
 
 /* USER CODE END Includes */
 
@@ -84,6 +86,10 @@ BrushMotorConfig pm1_motor = {
 // 电流传感器校准相关
 static uint8_t current_calibrated = 0; // 校准完成标记（0：未校准，1：已校准）
 static uint8_t calibrate_request = 0;  // 校准请求（0：无请求，1：需要校准）
+
+// 声明adc.c中定义的全局变量
+extern uint16_t adc_raw_data[ADC_TOTAL_SAMPLES];    // 原始ADC采样值（单通道×采样次数）
+extern float adc_filtered_data[ADC_CHANNEL_NUM];    // 滤波后的ADC平均值（浮点型）
 /* USER CODE END 0 */
 
 /**
@@ -140,7 +146,10 @@ int main(void)
   BSP_Encoder_Start(ENCODER_PM1); // 若编码器计数停止，启动编码器
 
   BSP_CurrentSensor_Init();
+  BSP_VoltageSensor_Init();
   HAL_TIM_Base_Start_IT(&htim6); // 启动定时器6中断，用于更新EnCoder、电流采样等信息
+
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_raw_data, ADC_TOTAL_SAMPLES);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -157,8 +166,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
     key_id = Key_Scan();
+
     if (key_id == KEY0_Pressed)
     {
       lcd_show_string(10, 90, 200, 24, 24, "key 0 pressed.", BLUE);
@@ -188,7 +197,7 @@ int main(void)
       duty = 0;
       BSP_Encoder_Stop(ENCODER_PM1); // 停止编码器计数
     }else{
-      lcd_show_string(10, 90, 200, 24, 24, "No key pressed.", BLUE);
+      // lcd_show_string(10, 90, 180, 24, 24, "No key pressed.", BLUE);
 		}
 
     if (duty == 0)
@@ -229,38 +238,45 @@ int main(void)
     sprintf(buffer, "PWM Duty: %d   ", duty);
     // lcd_show_string(10, 120, 200, 24, 24, buffer, BLUE);
 
+
     /*测速代码*/
     // 读取编码器数据
     int32_t count1 = BSP_Encoder_GetCount(ENCODER_PM1);
     float rpm1 = BSP_Encoder_GetSpeedRPM(ENCODER_PM1);
-    sprintf(buffer, "PM1_Pulses: %ld, RPM: %.1f   ", (long)count1, rpm1);
-    // lcd_show_string(10, 150, 400, 24, 24, buffer, BLUE);
+
 
     // 读取电流数据
     float current_ma = BSP_CurrentSensor_GetCurrent();
-    sprintf(buffer, "Current: %.2f mA   ", current_ma);
-    // lcd_show_string(10, 180, 300, 24, 24, buffer, BLUE);
+
     // 读取ADC1——IN8的平均值
     float adc_raw = BSP_CurrentSensor_GetADCValue();
-    sprintf(buffer, "adc_raw: %.1f   ", adc_raw);
-    // lcd_show_string(10, 210, 300, 24, 24, buffer, BLUE);
+
 		//读偏移量
     float adc_offset = BSP_CurrentSensor_GetOffset();
-    sprintf(buffer, "adc_offset: %.1f   ", adc_offset);
-    // lcd_show_string(10, 240, 300, 24, 24, buffer, BLUE);
+
+    // 读取电压数据
+    float voltage = BSP_VoltageSensor_GetPowerVoltage();
+
+
 
     // 串口发送（每 500ms 一次）
-    if (++send_cnt >= 10)
+    if (++send_cnt >= 10000)
     { // 假设 while(1) 循环 ~50ms/次 → 10×50=500ms
       send_cnt = 0;
-      sprintf(buffer, "PM1_Pulses: %ld, RPM: %.2f, Current: %.1f mA\r\n",
-              (long)count1, rpm1, current_ma);
-
-      
+      sprintf(buffer, "PM1_Pulses: %ld, RPM: %.2f, Current: %.1f mA, Voltage: %.2f V\r\n",
+              (long)count1, rpm1, current_ma, voltage);
       printf(buffer);
+      // sprintf(buffer, "PM1_Pulses: %ld, RPM: %.1f   ", (long)count1, rpm1);
+      // lcd_show_string(10, 150, 400, 24, 24, buffer, BLUE);
+      // sprintf(buffer, "Current: %.2f mA   ", current_ma);
+      // lcd_show_string(10, 180, 300, 24, 24, buffer, BLUE);
+      // sprintf(buffer, "adc_raw: %.1f   ", adc_raw);
+      // lcd_show_string(10, 210, 300, 24, 24, buffer, BLUE);
+      // sprintf(buffer, "adc_offset: %.1f   ", adc_offset);
+      // lcd_show_string(10, 240, 300, 24, 24, buffer, BLUE);
+
     }
     // HAL_Delay(50);
-
     
 
 
@@ -315,27 +331,18 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-int32_t timcount1 = 0;
-char buffer1[50];
-int32_t timcount2 = 0;
-char buffer2[50];
 // 中断回调函数
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM3 || htim->Instance == TIM2)
   {
-    // timcount1++;
-    // sprintf(buffer1, "TIM Count1: %d   ", timcount1);
-    // lcd_show_string(250, 270, 400, 24, 24, buffer1, BLUE);
     BSP_Encoder_HandleOverflow(htim);
   }
   else if (htim->Instance == TIM6)
   {
-    // timcount2++;
-    // sprintf(buffer2, "TIM Count2: %d   ", timcount2);
-    // lcd_show_string(10, 270, 400, 24, 24, buffer2, BLUE);
     BSP_Encoder_UpdateSpeed();
     BSP_CurrentSensor_Update(); // 更新电流检测结果
+    BSP_VoltageSensor_Update(); // 更新ADC值
 
   }
 }

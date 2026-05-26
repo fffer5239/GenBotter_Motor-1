@@ -30,10 +30,10 @@ void BSP_CurrentSensor_Init(void)
 {
     // 启动ADC DMA连续采集（与adc.c中的DMA配置匹配）
     // ADC_SUM定义为 ADC_CH_NUM * ADC_COLL（来自adc.c的采集总量）
-    if (HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_raw_data, ADC_TOTAL_SAMPLES) != HAL_OK)
-    {
-        Error_Handler();  // 调用工程中的错误处理函数
-    }
+    // if (HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_raw_data, ADC_TOTAL_SAMPLES) != HAL_OK)
+    // {
+    //     Error_Handler();  // 调用工程中的错误处理函数
+    // }
 }
 
 /**
