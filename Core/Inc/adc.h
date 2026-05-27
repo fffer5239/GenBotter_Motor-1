@@ -35,7 +35,7 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
-#define ADC_CHANNEL_NUM  2     // 通道（电流传感器）
+#define ADC_CHANNEL_NUM  3     // 通道（电流传感器、电压传感器、温度传感器）
 // #define ADC_SAMPLE_COUNT 500   // 单次滤波的采样次数（可根据需求调整）
 #define ADC_SAMPLE_COUNT 500   // 单次滤波的采样次数（可根据需求调整）
 #define ADC_TOTAL_SAMPLES (ADC_CHANNEL_NUM * ADC_SAMPLE_COUNT)  // 总采样数

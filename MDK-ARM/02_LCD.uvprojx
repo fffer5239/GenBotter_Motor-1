@@ -1328,6 +1328,11 @@
               <FileType>1</FileType>
               <FilePath>..\Mid\BSP\Src\bsp_voltage_sensor.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_temper_sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Mid\BSP\Src\bsp_temper_sensor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

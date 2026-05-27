@@ -27,12 +27,18 @@ Project File Date:  05/26/2026
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\softinstall\keil\Core\ARM\ARMCC\Bin'
 Build target '02_LCD'
+assembling startup_stm32f407xx.s...
+compiling bsp_current_sensor.c...
+compiling bsp_voltage_sensor.c...
+compiling bsp_temper_sensor.c...
+compiling gpio.c...
+compiling adc.c...
 compiling main.c...
-../Core/Src/main.c(159): warning:  #177-D: variable "send_temp"  was declared but never referenced
+../Core/Src/main.c(161): warning:  #177-D: variable "send_temp"  was declared but never referenced
     uint16_t send_temp = 0;
 ../Core/Src/main.c: 1 warning, 0 errors
 linking...
-Program Size: Code=29300 RO-data=12616 RW-data=84 ZI-data=3844  
+Program Size: Code=29980 RO-data=12768 RW-data=96 ZI-data=4856  
 FromELF: creating hex file...
 "02_LCD\02_LCD.axf" - 0 Error(s), 1 Warning(s).
 
@@ -58,7 +64,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE:5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:03
+Build Time Elapsed:  00:00:05
 </pre>
 </body>
 </html>

@@ -35,6 +35,7 @@
 #include "bsp_encoder.h"
 #include "bsp_current_sensor.h"
 #include "bsp_voltage_sensor.h"
+#include "bsp_temper_sensor.h"
 
 
 /* USER CODE END Includes */
@@ -147,6 +148,7 @@ int main(void)
 
   BSP_CurrentSensor_Init();
   BSP_VoltageSensor_Init();
+  BSP_TemperSensor_Init();
   HAL_TIM_Base_Start_IT(&htim6); // 启动定时器6中断，用于更新EnCoder、电流采样等信息
 
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_raw_data, ADC_TOTAL_SAMPLES);
@@ -257,14 +259,17 @@ int main(void)
     // 读取电压数据
     float voltage = BSP_VoltageSensor_GetPowerVoltage();
 
+    // 读取温度数据
+    float temperature = BSP_TemperSensor_GetTemperature();
+
 
 
     // 串口发送（每 500ms 一次）
     if (++send_cnt >= 10000)
     { // 假设 while(1) 循环 ~50ms/次 → 10×50=500ms
       send_cnt = 0;
-      sprintf(buffer, "PM1_Pulses: %ld, RPM: %.2f, Current: %.1f mA, Voltage: %.2f V\r\n",
-              (long)count1, rpm1, current_ma, voltage);
+      sprintf(buffer, "PM1_Pulses: %ld, RPM: %.2f, Current: %.1f mA, Voltage: %.2f V, Temperature: %.2f C\r\n",
+              (long)count1, rpm1, current_ma, voltage, temperature);
       printf(buffer);
       // sprintf(buffer, "PM1_Pulses: %ld, RPM: %.1f   ", (long)count1, rpm1);
       // lcd_show_string(10, 150, 400, 24, 24, buffer, BLUE);
@@ -343,6 +348,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     BSP_Encoder_UpdateSpeed();
     BSP_CurrentSensor_Update(); // 更新电流检测结果
     BSP_VoltageSensor_Update(); // 更新ADC值
+    BSP_TemperSensor_Update(); // 更新温度检测结果
 
   }
 }

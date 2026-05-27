@@ -51,3 +51,4 @@
 02_lcd\main.o: ../Mid/BSP/Inc/bsp_encoder.h
 02_lcd\main.o: ../Mid/BSP/Inc/bsp_current_sensor.h
 02_lcd\main.o: ../Mid/BSP/Inc/bsp_voltage_sensor.h
+02_lcd\main.o: ../Mid/BSP/Inc/bsp_temper_sensor.h
