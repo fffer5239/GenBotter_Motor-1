@@ -230,15 +230,29 @@ int32_t BSP_Encoder_GetCount(Encoder_ID_t encoder_id)
  * @brief   获取编码器的转速
  * @param   encoder_id    编码器ID
  * @return  编码器的转速
- * @note   如果encoder_id无效，将返回0
+ * @note    如果encoder_id无效，将返回0
  */
+// float BSP_Encoder_GetSpeedRPM(Encoder_ID_t encoder_id)
+// {
+//     if (encoder_id <= ENCODER_PM2)
+//     {
+//         // 无论是否运行，都返回计算出的转速
+//         // 停止时rpm为0，这是正确的
+//         return encoders[encoder_id].rpm;
+//     }
+//     return 0.0f;
+// }
+
 float BSP_Encoder_GetSpeedRPM(Encoder_ID_t encoder_id)
 {
     if (encoder_id <= ENCODER_PM2)
     {
         // 无论是否运行，都返回计算出的转速
         // 停止时rpm为0，这是正确的
-        return encoders[encoder_id].rpm;
+		if(encoders[encoder_id].rpm != 0)
+            return -encoders[encoder_id].rpm; // 注意：发现返回值与实际旋转方向相反，所以改变原来的函数乘以-1
+        else
+            return 0.0f;
     }
     return 0.0f;
 }

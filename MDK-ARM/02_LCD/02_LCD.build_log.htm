@@ -22,25 +22,27 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 D:\Users\Desktop\GenBotter_Motro\basic_folder\03_Firmware\02_LCD\MDK-ARM\02_LCD.uvprojx
-Project File Date:  05/26/2026
+Project File Date:  05/30/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\softinstall\keil\Core\ARM\ARMCC\Bin'
 Build target '02_LCD'
-assembling startup_stm32f407xx.s...
-compiling bsp_current_sensor.c...
-compiling bsp_voltage_sensor.c...
-compiling bsp_temper_sensor.c...
-compiling gpio.c...
-compiling adc.c...
+compiling speed_loop.c...
+compiling bsp_encoder.c...
 compiling main.c...
-../Core/Src/main.c(161): warning:  #177-D: variable "send_temp"  was declared but never referenced
+../Core/Src/main.c(173): warning:  #177-D: variable "send_temp"  was declared but never referenced
     uint16_t send_temp = 0;
-../Core/Src/main.c: 1 warning, 0 errors
+../Core/Src/main.c(175): warning:  #177-D: variable "buffer"  was declared but never referenced
+    char buffer[50];
+../Core/Src/main.c(89): warning:  #177-D: variable "current_calibrated"  was declared but never referenced
+  static uint8_t current_calibrated = 0; // 校准完成标记�?0：未校准�?1：已校准�?
+../Core/Src/main.c(90): warning:  #177-D: variable "calibrate_request"  was declared but never referenced
+  static uint8_t calibrate_request = 0;  // 校准请求�?0：无请求�?1：需要校准）
+../Core/Src/main.c: 4 warnings, 0 errors
 linking...
-Program Size: Code=29980 RO-data=12768 RW-data=96 ZI-data=4856  
+Program Size: Code=28932 RO-data=12616 RW-data=96 ZI-data=4904  
 FromELF: creating hex file...
-"02_LCD\02_LCD.axf" - 0 Error(s), 1 Warning(s).
+"02_LCD\02_LCD.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -64,7 +66,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE:5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:05
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

@@ -36,7 +36,8 @@
 #include "bsp_current_sensor.h"
 #include "bsp_voltage_sensor.h"
 #include "bsp_temper_sensor.h"
-
+#include "speed_loop.h"
+#include "pid_controller.h"
 
 /* USER CODE END Includes */
 
@@ -91,6 +92,16 @@ static uint8_t calibrate_request = 0;  // 校准请求（0：无请求，1：需
 // 声明adc.c中定义的全局变量
 extern uint16_t adc_raw_data[ADC_TOTAL_SAMPLES];    // 原始ADC采样值（单通道×采样次数）
 extern float adc_filtered_data[ADC_CHANNEL_NUM];    // 滤波后的ADC平均值（浮点型）
+
+typedef enum
+{
+  MODE_OPEN_LOOP = 0,        // 开环模式，直接设置PWM占空比
+  MODE_SPEED_CLOSED_LOOP = 1 // 闭环模式，设置目标RPM
+} RunMode_t;
+
+RunMode_t current_mode = MODE_SPEED_CLOSED_LOOP; // 默认当前模式为开环模式
+float target_val = 0.0f;                         // 默认目标值为0(可能是Duty或RPM)
+extern PID_Handle_t hspeed_pid; // 这样你才能在 main 里的 LCD 显示函数读取 pid 数据
 /* USER CODE END 0 */
 
 /**
@@ -149,9 +160,10 @@ int main(void)
   BSP_CurrentSensor_Init();
   BSP_VoltageSensor_Init();
   BSP_TemperSensor_Init();
+  SpeedLoop_Init(); // 初始化速度闭环控制模块
   HAL_TIM_Base_Start_IT(&htim6); // 启动定时器6中断，用于更新EnCoder、电流采样等信息
 
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_raw_data, ADC_TOTAL_SAMPLES);
+  // HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_raw_data, ADC_TOTAL_SAMPLES);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -161,6 +173,7 @@ int main(void)
   uint16_t send_temp = 0;
   uint16_t send_cnt = 0;
   char buffer[50];
+  char lcd_buf[50];
   uint32_t sysclk = HAL_RCC_GetSysClockFreq();
   printf("Brushed_Motor_Sensing, System Clock: %d Hz\r\n", sysclk);
   while (1)
@@ -168,120 +181,127 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    key_id = Key_Scan();
-
-    if (key_id == KEY0_Pressed)
+ key_id = Key_Scan();
+    if (key_id == KEY0_Pressed) //k0,用于切换模式（开环控制 or 闭环控制）
     {
-      lcd_show_string(10, 90, 200, 24, 24, "key 0 pressed.", BLUE);
-      Led_Toggle(LED1);
-      duty += 10;
-      if (duty > 100)
+      // 切换模式前，先停车；
+      target_val = 0.0f;
+      BrushMotor_Stop();
+
+      if (current_mode == MODE_OPEN_LOOP)
       {
-        duty = 100;
+        current_mode = MODE_SPEED_CLOSED_LOOP;
+        lcd_show_string(10, 60, 270, 24, 24, "Mode: Speed Closed Loop", GREEN);
+      }
+      else
+      {
+        current_mode = MODE_OPEN_LOOP;
+        lcd_show_string(10, 60, 270, 24, 24, "Mode: Open Loop         ", GREEN);
       }
     }
-    else if (key_id == KEY1_Pressed)
+    else if (key_id == KEY1_Pressed) // k1，加速 / 反转减速
     {
-      lcd_show_string(10, 90, 200, 24, 24, "key 1 pressed.", BLUE);
-      Led_Toggle(LED2);
-
-      duty -= 10;
-      if (duty < -100)
+      if (current_mode == MODE_OPEN_LOOP)
       {
-        duty = -100;
+        target_val += 10.0f; // 开环模式下，增加PWM占空比
+        if (target_val > 100.0f)
+          target_val = 100.0f; // 限幅
       }
+      else // 闭环模式下，增加目标RPM
+      {
+        target_val += 20.0f; // 增加50 RPM
+        if (target_val > 200.0f)
+          target_val = 200.0f; // 限制最高目标转速
+      }
+      BrushMotor_Enable();
     }
-    else if (key_id == KEY2_Pressed)
+    else if (key_id == KEY2_Pressed)  // k2，减速 / 反转加速
     {
-      lcd_show_string(10, 90, 200, 24, 24, "key 2 pressed.", BLUE);
-      Led_Toggle(LED1);
-      Led_Toggle(LED2);
-      duty = 0;
-      BSP_Encoder_Stop(ENCODER_PM1); // 停止编码器计数
-    }else{
-      // lcd_show_string(10, 90, 180, 24, 24, "No key pressed.", BLUE);
-		}
-
-    if (duty == 0)
-    {
-      BrushMotor_Stop(); // 停止电机
-
-      // 电机停止时，若未校准或收到校准请求，执行零漂校准
-      if (current_calibrated == 0 || calibrate_request == 1)
+      if (current_mode == MODE_OPEN_LOOP)
       {
-        lcd_show_string(10, 60, 450, 24, 24,  "Calibrating current offset...", RED);
-        BSP_CurrentSensor_CalibrateOffset(); // 执行校准
-        current_calibrated = 1;              // 标记为已校准
-        calibrate_request = 0;               // 清除请求
-        lcd_show_string(10, 60, 450, 24, 24,  "Current offset calibrated   ", GREEN);
+        target_val -= 10.0f; // 开环模式下，减少PWM占空比
+        if (target_val < -100.0f)
+          target_val = -100.0f; // 限幅
       }
-    }
-    else if (duty < 0)
-    {
-      if (!BSP_Encoder_IsRunning(ENCODER_PM1))
+      else // 闭环模式下，减少目标RPM
       {
-        BSP_Encoder_Start(ENCODER_PM1); // 若编码器计数停止，启动编码器
+        target_val -= 20.0f; // 减少50 RPM
+        if (target_val < -200.0f)
+          target_val = -200.0f; // 限幅
       }
-      BrushMotor_SetDirection(MOTOR_REVERSE); // 反转
-      BrushMotor_SetSpeed(abs(duty));         // 设置电机速度
-      BrushMotor_Enable();                    // 启动电机
-    }
-    else if (duty > 0)
-    {
-      if (!BSP_Encoder_IsRunning(ENCODER_PM1))
-      {
-        BSP_Encoder_Start(ENCODER_PM1); // 若编码器计数停止，启动编码器
-      }
-      BrushMotor_SetDirection(MOTOR_FORWARD); // 正转
-      BrushMotor_SetSpeed(duty);              // 设置电机速度
-      BrushMotor_Enable();                    // 启动电机
+      BrushMotor_Enable();
     }
 
-    sprintf(buffer, "PWM Duty: %d   ", duty);
-    // lcd_show_string(10, 120, 200, 24, 24, buffer, BLUE);
+    /* --- 2. 执行电机控制逻辑 --- */
+    if (current_mode == MODE_OPEN_LOOP)
+    {
+      // 开环模式，直接设置PWM占空比
+      duty = (int)target_val;
+      BrushMotor_SetSpeed(abs(duty)); // 设置速度
+      if (duty > 0)
+        BrushMotor_SetDirection(MOTOR_FORWARD); // 正转
+      else if (duty < 0)
+        BrushMotor_SetDirection(MOTOR_REVERSE); // 反转
+      else
+        BrushMotor_Stop(); // 停止
+    }
+    else
+    {
+      // 闭环模式，只需要设置目标RPM
+      SpeedLoop_SetTargetRPM(target_val);
+    }
 
+    /* --- 3. 屏幕刷新 & 串口发送 (每 200ms 刷一次，避免闪烁) --- */
+    static uint32_t last_disp_time = 0;
+    static float current_duty = 0;
+    if (HAL_GetTick() - last_disp_time > 200)
+    {
+      // 1. 显示目标值
+      sprintf((char *)lcd_buf, "Target: %6.1f   ", target_val);
+      lcd_show_string(10, 100, 240, 24, 24, (char *)lcd_buf, BLUE);
 
-    /*测速代码*/
+      // 2. 显示实际实际转速
+      float real_rpm = BSP_Encoder_GetSpeedRPM(ENCODER_PM1);
+      sprintf((char *)lcd_buf, "Actual: %6.1f RPM   ", real_rpm);
+      lcd_show_string(10, 140, 240, 24, 24, (char *)lcd_buf, BLACK);
+
+      // 3. 显示PWM
+      if (current_mode == MODE_OPEN_LOOP)
+      {
+        current_duty = target_val; // 开环模式下，目标值是pwm输出值
+      }
+      else
+      {
+        // 闭环模式下，占空比是PID的计算输出结果
+        extern PID_Handle_t hspeed_pid;
+        current_duty = hspeed_pid.Output;
+      }
+      sprintf((char *)lcd_buf, "Duty  : %6.1f %% ", current_duty);
+      lcd_show_string(10, 180, 240, 24, 24, (char *)lcd_buf, RED);
+      last_disp_time = HAL_GetTick();
+    }
+
     // 读取编码器数据
-    int32_t count1 = BSP_Encoder_GetCount(ENCODER_PM1);
     float rpm1 = BSP_Encoder_GetSpeedRPM(ENCODER_PM1);
 
-
     // 读取电流数据
-    float current_ma = BSP_CurrentSensor_GetCurrent();
+    // float current_ma = BSP_CurrentSensor_GetCurrent();
 
-    // 读取ADC1——IN8的平均值
-    float adc_raw = BSP_CurrentSensor_GetADCValue();
+    // 读取电压值并显示
+    // float voltage_v = BSP_VoltageSensor_GetPowerVoltage();
 
-		//读偏移量
-    float adc_offset = BSP_CurrentSensor_GetOffset();
-
-    // 读取电压数据
-    float voltage = BSP_VoltageSensor_GetPowerVoltage();
-
-    // 读取温度数据
-    float temperature = BSP_TemperSensor_GetTemperature();
-
-
-
-    // 串口发送（每 500ms 一次）
-    if (++send_cnt >= 10000)
+    // 读取温度值并显示
+    // float temper_c = BSP_TemperSensor_GetTemperature();
+    // 串口发送（每 10*10 + 10*可能的按键消抖所用时长 ms 一次）
+    if (++send_cnt >= 100)
     { // 假设 while(1) 循环 ~50ms/次 → 10×50=500ms
       send_cnt = 0;
-      sprintf(buffer, "PM1_Pulses: %ld, RPM: %.2f, Current: %.1f mA, Voltage: %.2f V, Temperature: %.2f C\r\n",
-              (long)count1, rpm1, current_ma, voltage, temperature);
-      printf(buffer);
-      // sprintf(buffer, "PM1_Pulses: %ld, RPM: %.1f   ", (long)count1, rpm1);
-      // lcd_show_string(10, 150, 400, 24, 24, buffer, BLUE);
-      // sprintf(buffer, "Current: %.2f mA   ", current_ma);
-      // lcd_show_string(10, 180, 300, 24, 24, buffer, BLUE);
-      // sprintf(buffer, "adc_raw: %.1f   ", adc_raw);
-      // lcd_show_string(10, 210, 300, 24, 24, buffer, BLUE);
-      // sprintf(buffer, "adc_offset: %.1f   ", adc_offset);
-      // lcd_show_string(10, 240, 300, 24, 24, buffer, BLUE);
+      sprintf((char *)lcd_buf, "PM1_Pulses: %.1f, RPM: %.2f\r\n",
+              current_duty, rpm1);
 
+      USART_SendString((char *)lcd_buf);
     }
-    // HAL_Delay(50);
+    HAL_Delay(10);
     
 
 
@@ -345,10 +365,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   else if (htim->Instance == TIM6)
   {
-    BSP_Encoder_UpdateSpeed();
-    BSP_CurrentSensor_Update(); // 更新电流检测结果
-    BSP_VoltageSensor_Update(); // 更新ADC值
-    BSP_TemperSensor_Update(); // 更新温度检测结果
+    // 1.无论什么模式，都要更新速度计算
+    BSP_Encoder_UpdateSpeed();  // 更新转速计算
+
+    // 2.闭环模式下，执行速度闭环任务
+    if (current_mode == MODE_SPEED_CLOSED_LOOP)
+    {
+      SpeedLoop_Task();
+    }
+    
+    // 3. 更新各传感器数据（无论开环还是闭环都更新，保持数据最新）
+    // BSP_CurrentSensor_Update(); // 更新电流检测结果
+    // BSP_VoltageSensor_Update(); // 更新电压检测结果
+    // BSP_TemperSensor_Update();  // 更新温度检测结果
 
   }
 }

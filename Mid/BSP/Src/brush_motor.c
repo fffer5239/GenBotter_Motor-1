@@ -85,6 +85,7 @@ void BrushMotor_SetSpeed(uint8_t speed)
     }
     // 改变CH1或者CH1N的PWM的占空比来设置速度
     uint32_t compare_val = (uint32_t)(speed * (motor_config->tim_arr / 100)); // Scale speed to match PWM range
+    //最大值为tim_arr
     __HAL_TIM_SET_COMPARE(motor_config->htim, motor_config->tim_channel, compare_val);
 }
 
