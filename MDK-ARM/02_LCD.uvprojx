@@ -1283,14 +1283,19 @@
           <GroupName>Mid/CONTROL</GroupName>
           <Files>
             <File>
+              <FileName>speed_loop.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Mid\Control\Src\speed_loop.c</FilePath>
+            </File>
+            <File>
               <FileName>pid_controller.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Mid\Control\Src\pid_controller.c</FilePath>
             </File>
             <File>
-              <FileName>speed_loop.c</FileName>
+              <FileName>vofa_plus.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Mid\Control\Src\speed_loop.c</FilePath>
+              <FilePath>..\Mid\Control\Src\vofa_plus.c</FilePath>
             </File>
           </Files>
         </Group>

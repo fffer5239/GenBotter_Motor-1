@@ -1,7 +1,7 @@
 /**
  * @file    bsp_encoder.c
  * @brief   直流有刷电机编码器测速*.c文件
- * @author  Dr. GAO
+ * @author  fffer
  * @date    2025-11-07
  * @version V1.0
  * @website https://genbotter.taobao.com
@@ -68,12 +68,6 @@ void BSP_Encoder_Init(void)
     encoders[ENCODER_PM2].last_count = 0;
     encoders[ENCODER_PM2].overflow_count = 0;
     encoders[ENCODER_PM2].rpm = 0.0f;
-
-    // // 启动速度计算定时器（50ms中断）
-    // if (IsTimerValid(&htim6))
-    // {
-    //     HAL_TIM_Base_Start_IT(&htim6);
-    // }
 
 }
 
@@ -230,19 +224,8 @@ int32_t BSP_Encoder_GetCount(Encoder_ID_t encoder_id)
  * @brief   获取编码器的转速
  * @param   encoder_id    编码器ID
  * @return  编码器的转速
- * @note    如果encoder_id无效，将返回0
+ * @note   如果encoder_id无效，将返回0
  */
-// float BSP_Encoder_GetSpeedRPM(Encoder_ID_t encoder_id)
-// {
-//     if (encoder_id <= ENCODER_PM2)
-//     {
-//         // 无论是否运行，都返回计算出的转速
-//         // 停止时rpm为0，这是正确的
-//         return encoders[encoder_id].rpm;
-//     }
-//     return 0.0f;
-// }
-
 float BSP_Encoder_GetSpeedRPM(Encoder_ID_t encoder_id)
 {
     if (encoder_id <= ENCODER_PM2)
@@ -302,7 +285,6 @@ void BSP_Encoder_UpdateSpeed(void)
             {
                 // 使用与正点原子相同的公式原理
                 // RPM = (脉冲数 × (60000/采样时间ms)) ÷ 减速比 ÷ PPR
-                // RPM = (脉冲数 ÷ (采样时间ms/60000)) ÷ 减速比 ÷ PPR
                 encoders[i].rpm = (delta_count * (60000.0f / SPEED_UPDATE_MS)) / (GEAR_RATIO * ENCODER_PPR);
             }
             else

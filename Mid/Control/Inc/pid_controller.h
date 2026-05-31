@@ -1,10 +1,10 @@
 /**
  * @file    pid_controller.h
  * @brief   PID控制器通用头文件
- * @author  fffer
- * @date    2026-2-24
- * @version V1.0
- * @note    适配电机开发板，支持位置式/增量式PID，可配置限幅
+ * @author  Dr. GAO
+ * @date    2025-3-2
+ * @version V1.1
+ * @note    适配GenBotter Motor-1开发板，支持位置式/增量式PID，可配置限幅
  */
 #ifndef __PID_CONTROLLER_H
 #define __PID_CONTROLLER_H
@@ -35,6 +35,8 @@ typedef struct {
     // --- 状态区 (运行时自动更新) ---
     float Target;           // 控制目标值 (例如：设定转速 10 RPM)
     float Actual;           // 传感器反馈值 (例如：当前实际转速)
+    // 相对brush_motor_6新增下面这1行（必要修改，微分先行用）
+    float Last_Actual;      // 上一次实际值，微分先行专用
     float Error;            // 当前误差 e(n) = Target - Actual
     float Prev_Error;       // 上一次误差 e(n-1)
     float Prev_Prev_Error;  // 上上一次误差 e(n-2)，仅增量式计算需要

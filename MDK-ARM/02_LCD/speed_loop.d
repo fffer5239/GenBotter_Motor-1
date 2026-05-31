@@ -1,9 +1,8 @@
 02_lcd\speed_loop.o: ..\Mid\Control\Src\speed_loop.c
 02_lcd\speed_loop.o: ../Mid/Control/Inc/speed_loop.h
-02_lcd\speed_loop.o: ../Mid/Control/Inc/control_config.h
 02_lcd\speed_loop.o: ../Mid/Control/Inc/pid_controller.h
 02_lcd\speed_loop.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\stdint.h
-02_lcd\speed_loop.o: ../Mid/BSP/Inc/brush_motor.h
+02_lcd\speed_loop.o: ../Mid/BSP/Inc/bsp_encoder.h
 02_lcd\speed_loop.o: ../Core/Inc/main.h
 02_lcd\speed_loop.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 02_lcd\speed_loop.o: ../Core/Inc/stm32f4xx_hal_conf.h
@@ -40,5 +39,9 @@
 02_lcd\speed_loop.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 02_lcd\speed_loop.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 02_lcd\speed_loop.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-02_lcd\speed_loop.o: ../Mid/BSP/Inc/bsp_encoder.h
+02_lcd\speed_loop.o: ../Mid/Control/Inc/control_config.h
+02_lcd\speed_loop.o: ../Mid/BSP/Inc/bsp_brush_motor.h
 02_lcd\speed_loop.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\math.h
+02_lcd\speed_loop.o: ../Mid/Control/Inc/vofa_plus.h
+02_lcd\speed_loop.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\stdio.h
+02_lcd\speed_loop.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\string.h

@@ -54,3 +54,5 @@
 02_lcd\main.o: ../Mid/BSP/Inc/bsp_temper_sensor.h
 02_lcd\main.o: ../Mid/Control/Inc/speed_loop.h
 02_lcd\main.o: ../Mid/Control/Inc/pid_controller.h
+02_lcd\main.o: ../Mid/Control/Inc/vofa_plus.h
+02_lcd\main.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\string.h

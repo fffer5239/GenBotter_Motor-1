@@ -1,4 +1,7 @@
 #include "pid_controller.h"
+#include "control_config.h"
+#include <main.h>
+#include <math.h>
 
 /**
  * @brief 初始化PID控制器（教学版）
@@ -32,6 +35,7 @@ void PID_Reset(PID_Handle_t *pid)
     // 状态区清零：无目标、无反馈、无误差、无积分、无输出
     pid->Target = 0.0f;            // 控制目标值（如设定转速）
     pid->Actual = 0.0f;            // 传感器反馈值（如实际转速）
+    pid->Last_Actual = 0.0f;       // 上一次实际值，微分先行专用
     pid->Error = 0.0f;             // 当前误差 e(n) = Target - Actual
     pid->Prev_Error = 0.0f;        // 上一次误差 e(n-1)
     pid->Prev_Prev_Error = 0.0f;   // 上上一次误差 e(n-2)（仅增量式用）
@@ -60,30 +64,32 @@ float PID_Compute(PID_Handle_t *pid, float target, float actual, PID_Mode_t mode
     {
         /********************* 位置式PID（全量输出） *********************/
         // 核心公式：Output = Kp*e(n) + Ki*∑e(n) + Kd*[e(n)-e(n-1)]
-        
-        // 1. 积分项计算：累加误差，消除静态误差（无误差时积分不再变化）
-        pid->Integral += pid->Error;  // 积分累加 ∑e(n) = 历史积分 + 当前误差
-        // 【教学重点】积分的作用：哪怕误差很小，累加后也能推动输出，消除静态误差
+        float p_out, i_out, diff_out; // 分步计算，教学更清晰
 
-        // 2. 积分抗饱和（教学重点：防止积分“溢出”导致输出失控）
-        // 原理：限制积分项的最终输出不超过 Integral_Max
-        if (pid->Integral * pid->Ki > pid->Integral_Max)
-        {
-            pid->Integral = pid->Integral_Max / pid->Ki;  // 积分上限限制
-        }
-        else if (pid->Integral * pid->Ki < -pid->Integral_Max)
-        {
-            pid->Integral = -pid->Integral_Max / pid->Ki; // 积分下限限制
-        }
+        // 1. 比例项计算：直接与当前误差成正比，快速响应
+        p_out = pid->Kp * pid->Error; // 比例输出 P = Kp * e(n)
 
-        // 3. 微分项计算：反映误差变化趋势，抑制超调
-        // 公式：Kd*[e(n) - e(n-1)] → 误差变化越快，微分输出越大
-        float diff_out = pid->Kd * (pid->Error - pid->Prev_Error);
-        // 【教学备注】工程中也常用「-Kd*(实际值变化率)」，避免目标值跳变冲击微分
-        
-        // 4. 位置式PID全量输出（分步计算，直观看到各部分贡献）
-        float p_out = pid->Kp * pid->Error;    // 比例项：快速响应当前误差
-        float i_out = pid->Ki * pid->Integral; // 积分项：消除静态误差
+        // 2. 积分项计算：累加误差，消除静态误差（无误差时积分不再变化）
+        // 积分分离：误差超阈值时不积分，防止大误差时积分反而加剧问题
+        if (fabs(pid->Error) < PID_INTEG_SEP_THRESH)
+        {
+            pid->Integral += pid->Error;  // 积分累加 ∑e(n) = 历史积分 + 当前误差
+            // 原有积分抗饱和逻辑保留，防止积分过大导致输出失控
+            if (pid->Integral * pid->Ki > pid->Integral_Max)
+            {
+                pid->Integral = pid->Integral_Max / pid->Ki;  // 积分上限限制
+            }
+        }else
+        {
+            // 误差过大，停止积分，防止积分反作用
+            pid->Integral = 0.0f; // 或者保持不变，根据实际情况调整
+        }
+        i_out = pid->Ki * pid->Integral; // 积分输出 I = Ki * ∑e(n)
+
+        // 3. 微分项计算：微分先行
+        // 替代传统 Kd*[e(n) - e(n-1)]，使用 -Kd*(实际值变化率)，避免目标值跳变冲击微分
+        diff_out = pid->Kd * (pid->Actual - pid->Last_Actual); // 微分输出 D = -Kd * Δ实际值
+
         pid->Output = p_out + i_out - diff_out; // 总输出（减微分是因为diff_out的符号特性）
     }
     else if (mode == PID_MODE_INCREMENTAL)
@@ -118,6 +124,7 @@ float PID_Compute(PID_Handle_t *pid, float target, float actual, PID_Mode_t mode
     }
 
     // 2. 更新误差历史（为下一次计算做准备，教学重点：时序更新）
+    pid->Last_Actual = pid->Actual;         // 实际值后移，微分先行专用
     pid->Prev_Prev_Error = pid->Prev_Error; // e(n-1) → e(n-2)（旧误差后移）
     pid->Prev_Error = pid->Error;           // e(n) → e(n-1)（当前误差变旧误差）
 

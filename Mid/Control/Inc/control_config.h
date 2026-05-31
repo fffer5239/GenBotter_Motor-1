@@ -1,10 +1,12 @@
 /**
  * @file    control_config.h
  * @brief   速度环PID控制配置文件
- * @author  fffer
- * @date    2026-2-24
- * @version V1.0
- * @note    该文件适用于电机开发板, 直流有刷电机控制，PID速度环控制的配置文件
+ * @author  Dr. GAO
+ * @date    2025-3-2
+ * @version V1.1
+ * @website https://genbotter.taobao.com
+ * @bilibili https://space.bilibili.com/486637340
+ * @note    该文件适用于GenBotter Motor-1电机开发板, 直流有刷电机控制，PID速度环控制的配置文件
  *          编译环境: 定时器、IO口等外设已经在CubeMX中配置完成，请确保项目正确配置
  */
 #ifndef __CONTROL_CONFIG_H
@@ -37,5 +39,10 @@
 // 说明：此处是「积分项输出上限」（Ki*∑e(n)），而非积分累加值∑e(n)的上限
 // 作用：防止堵转时I项无限累加，导致电机恢复后“飞车”
 #define PID_INTEGRAL_MAX        90.0f
+
+/* ================= 工程优化参数（相对于brush_motor_6新增）================= */
+#define RPM_FILTER_ALPHA        0.2f    // 转速低通滤波系数(0.1~0.3)：越小越平滑，响应越慢
+#define PID_INTEG_SEP_THRESH    30.0f   // 积分分离阈值(RPM)：误差超该值，停止积分
+#define PID_DEADZONE_THRESH     0.1f    // 死区补偿触发阈值：PID输出超该值才补偿
 
 #endif

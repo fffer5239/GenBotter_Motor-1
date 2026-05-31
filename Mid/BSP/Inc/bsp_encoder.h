@@ -15,7 +15,7 @@
 #include "main.h"
 
 // 编码器配置
-#define ENCODER_PPR        52       // 编码器每转脉冲数（4倍频后的值）
+#define ENCODER_PPR        52       // 编码器每转脉冲数（4倍频后的值 13*4）
 #define GEAR_RATIO         30.0f    // 减速比
 #define SPEED_UPDATE_MS    10       // 速度更新周期(ms)
 

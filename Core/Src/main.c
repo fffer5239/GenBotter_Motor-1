@@ -38,6 +38,7 @@
 #include "bsp_temper_sensor.h"
 #include "speed_loop.h"
 #include "pid_controller.h"
+#include "vofa_plus.h"
 
 /* USER CODE END Includes */
 
@@ -86,8 +87,8 @@ BrushMotorConfig pm1_motor = {
 };
 
 // 电流传感器校准相关
-static uint8_t current_calibrated = 0; // 校准完成标记（0：未校准，1：已校准）
-static uint8_t calibrate_request = 0;  // 校准请求（0：无请求，1：需要校准）
+//static uint8_t current_calibrated = 0; // 校准完成标记（0：未校准，1：已校准）
+//static uint8_t calibrate_request = 0;  // 校准请求（0：无请求，1：需要校准）
 
 // 声明adc.c中定义的全局变量
 extern uint16_t adc_raw_data[ADC_TOTAL_SAMPLES];    // 原始ADC采样值（单通道×采样次数）
@@ -102,6 +103,9 @@ typedef enum
 RunMode_t current_mode = MODE_SPEED_CLOSED_LOOP; // 默认当前模式为开环模式
 float target_val = 0.0f;                         // 默认目标值为0(可能是Duty或RPM)
 extern PID_Handle_t hspeed_pid; // 这样你才能在 main 里的 LCD 显示函数读取 pid 数据
+
+// VOFA+发送频率计数器（10ms*5=50ms发送一次）
+uint16_t vofa_send_cnt = 0; // VOFA+发送频率计数器，配合定时器中断实现定期发送调试数据到VOFA+
 /* USER CODE END 0 */
 
 /**
@@ -170,9 +174,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   KeyPressedID key_id = KEY_None;
   int duty = 0;
-  uint16_t send_temp = 0;
-  uint16_t send_cnt = 0;
-  char buffer[50];
   char lcd_buf[50];
   uint32_t sysclk = HAL_RCC_GetSysClockFreq();
   printf("Brushed_Motor_Sensing, System Clock: %d Hz\r\n", sysclk);
@@ -181,7 +182,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
- key_id = Key_Scan();
+ /* --- 1. 按键处理 --- */
+    key_id = Key_Scan();
     if (key_id == KEY0_Pressed) //k0,用于切换模式（开环控制 or 闭环控制）
     {
       // 切换模式前，先停车；
@@ -281,9 +283,7 @@ int main(void)
       last_disp_time = HAL_GetTick();
     }
 
-    // 读取编码器数据
-    float rpm1 = BSP_Encoder_GetSpeedRPM(ENCODER_PM1);
-
+		
     // 读取电流数据
     // float current_ma = BSP_CurrentSensor_GetCurrent();
 
@@ -292,16 +292,7 @@ int main(void)
 
     // 读取温度值并显示
     // float temper_c = BSP_TemperSensor_GetTemperature();
-    // 串口发送（每 10*10 + 10*可能的按键消抖所用时长 ms 一次）
-    if (++send_cnt >= 100)
-    { // 假设 while(1) 循环 ~50ms/次 → 10×50=500ms
-      send_cnt = 0;
-      sprintf((char *)lcd_buf, "PM1_Pulses: %.1f, RPM: %.2f\r\n",
-              current_duty, rpm1);
-
-      USART_SendString((char *)lcd_buf);
-    }
-    HAL_Delay(10);
+    // HAL_Delay(10);
     
 
 
@@ -372,6 +363,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (current_mode == MODE_SPEED_CLOSED_LOOP)
     {
       SpeedLoop_Task();
+    }
+
+    // 4. VOFA+定期发送调试数据
+    vofa_send_cnt++;
+    if (vofa_send_cnt >= 5)
+    {
+      vofa_send_cnt = 0;
+      VOFA_Plus_SendSpeedLoopData();
     }
     
     // 3. 更新各传感器数据（无论开环还是闭环都更新，保持数据最新）

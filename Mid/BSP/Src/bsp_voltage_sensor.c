@@ -1,3 +1,14 @@
+/**
+ * @file    bsp_voltage_sensor.c
+ * @brief   直流有刷电机驱动板H桥供电电压检测源*.c文件
+ * @author  Dr. GAO
+ * @date    2025-12-06
+ * @version V1.0
+ * @website https://genbotter.taobao.com
+ * @email   mailto:yanzenggao@163.com
+ * @note    该文件适用于GenBotter Motor-1电机开发板, 直流有刷电机控制，使用电机开发板上的PM1(如果要使用PM2，请修改ADC通道配置)
+ *          编译环境: 定时器、IO口等外设已经在CubeMX中配置完成，请确保项目正确配置
+ */
 #include "bsp_voltage_sensor.h"
 #include "adc.h"
 

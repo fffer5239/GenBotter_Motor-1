@@ -18,11 +18,10 @@
 // 推导：3.3V参考电压，12位ADC(4096阶)，传感器灵敏度0.12V/A（示例，需按硬件修改）
 #define CURRENT_ADC_REF_VOLTAGE 3.3f     // ADC参考电压(V)
 #define CURRENT_ADC_RESOLUTION 4096.0f   // 12位ADC的最大值
-#define CURRENT_SENSOR_SENSITIVITY 0.12f // 传感器灵敏度(V/A)，需按硬件手册修改 1 / 6 / 20mR -> 0.12V/A
+#define CURRENT_SENSOR_SENSITIVITY 0.12f // 传感器灵敏度(V/A)，需按硬件手册修改
 
 // 转换公式：电流(mA) = (ADC值对应的电压 - 零漂电压) / 灵敏度 * 1000
 // #define ADC_TO_MA_FACTOR ((CURRENT_ADC_REF_VOLTAGE / CURRENT_ADC_RESOLUTION) / CURRENT_SENSOR_SENSITIVITY * 1000.0f )
-//(((3.3V / 4096.0f) / 6) /0.02)* 1000 = 6.714f
 #define ADC_TO_MA_FACTOR 6.714f
 
 // 函数声明

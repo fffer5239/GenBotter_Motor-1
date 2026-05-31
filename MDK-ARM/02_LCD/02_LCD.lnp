@@ -41,8 +41,9 @@
 "02_lcd\bsp_current_sensor.o"
 "02_lcd\bsp_voltage_sensor.o"
 "02_lcd\bsp_temper_sensor.o"
-"02_lcd\pid_controller.o"
 "02_lcd\speed_loop.o"
+"02_lcd\pid_controller.o"
+"02_lcd\vofa_plus.o"
 --library_type=microlib --strict --scatter "02_LCD\02_LCD.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
