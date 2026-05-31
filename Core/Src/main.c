@@ -100,7 +100,7 @@ typedef enum
   MODE_SPEED_CLOSED_LOOP = 1 // 闭环模式，设置目标RPM
 } RunMode_t;
 
-RunMode_t current_mode = MODE_SPEED_CLOSED_LOOP; // 默认当前模式为开环模式
+RunMode_t current_mode = MODE_OPEN_LOOP; // 默认当前模式为开环模式
 float target_val = 0.0f;                         // 默认目标值为0(可能是Duty或RPM)
 extern PID_Handle_t hspeed_pid; // 这样你才能在 main 里的 LCD 显示函数读取 pid 数据
 
@@ -278,21 +278,24 @@ int main(void)
         extern PID_Handle_t hspeed_pid;
         current_duty = hspeed_pid.Output;
       }
-      sprintf((char *)lcd_buf, "Duty  : %6.1f %% ", current_duty);
+      sprintf((char *)lcd_buf, "Duty  : %4.2f %% ", current_duty);
       lcd_show_string(10, 180, 240, 24, 24, (char *)lcd_buf, RED);
+
+      // 相对于brush_motor_8新增：同一行不同颜色显示KP/KI/KD（核心代码）
+			// KP：x=10, y=220，红色（%6.1f 表示总宽度6字符，含小数点，前面自动补空格）
+			sprintf((char *)lcd_buf, "KP: %4.2f", hspeed_pid.Kp);
+			lcd_show_string(10, 220, 110, 24, 24, (char *)lcd_buf, RED);
+
+			// KI：x=130, 同一行，绿色（和KP用相同的%6.1f，保证空格一致）
+			sprintf((char *)lcd_buf, "KI: %4.2f", hspeed_pid.Ki);
+			lcd_show_string(130, 220, 110, 24, 24, (char *)lcd_buf, GREEN);
+
+			// KD：x=250, 同一行，蓝色（统一格式，对齐更整齐）
+			sprintf((char *)lcd_buf, "KD: %4.2f", hspeed_pid.Kd);
+			lcd_show_string(250, 220, 110, 24, 24, (char *)lcd_buf, BLUE);
+
       last_disp_time = HAL_GetTick();
     }
-
-		
-    // 读取电流数据
-    // float current_ma = BSP_CurrentSensor_GetCurrent();
-
-    // 读取电压值并显示
-    // float voltage_v = BSP_VoltageSensor_GetPowerVoltage();
-
-    // 读取温度值并显示
-    // float temper_c = BSP_TemperSensor_GetTemperature();
-    // HAL_Delay(10);
     
 
 
@@ -367,7 +370,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     // 4. VOFA+定期发送调试数据
     vofa_send_cnt++;
-    if (vofa_send_cnt >= 5)
+    if (vofa_send_cnt >= 1)
     {
       vofa_send_cnt = 0;
       VOFA_Plus_SendSpeedLoopData();

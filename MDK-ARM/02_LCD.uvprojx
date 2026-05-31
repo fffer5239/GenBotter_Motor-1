@@ -1297,6 +1297,11 @@
               <FileType>1</FileType>
               <FilePath>..\Mid\Control\Src\vofa_plus.c</FilePath>
             </File>
+            <File>
+              <FileName>pid_param_parse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Mid\Control\Src\pid_param_parse.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

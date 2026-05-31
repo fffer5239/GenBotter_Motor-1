@@ -45,3 +45,4 @@
 02_lcd\speed_loop.o: ../Mid/Control/Inc/vofa_plus.h
 02_lcd\speed_loop.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\stdio.h
 02_lcd\speed_loop.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\string.h
+02_lcd\speed_loop.o: ../Mid/Control/Inc/pid_param_parse.h

@@ -42,7 +42,27 @@ void PID_Reset(PID_Handle_t *pid)
     pid->Integral = 0.0f;          // 积分累加值（仅位置式用）
     pid->Output = 0.0f;            // 控制器最终输出（如PWM占空比）
 }
-
+/**
+ * @brief 动态更新PID控制器参数
+ * @param pid       PID控制器句柄
+ * @param kp        新比例系数
+ * @param ki        新积分系数
+ * @param kd        新微分系数
+ * @param max_out   新输出限幅
+ * @param max_int   新积分限幅
+ */
+void PID_UpdateParam(PID_Handle_t *pid, float kp, float ki, float kd, float max_out, float max_int) {
+    if (pid == NULL) return;
+    
+    // 临界区保护（可选，防止中断中更新参数导致异常）
+    __disable_irq(); // 关闭全局中断
+    pid->Kp = kp;
+    pid->Ki = ki;
+    pid->Kd = kd;
+    pid->Output_Max = max_out;
+    pid->Integral_Max = max_int;
+    __enable_irq(); // 开启全局中断
+}
 /**
  * @brief PID核心计算（教学版，分位置式/增量式）
  * @param pid     PID控制器句柄

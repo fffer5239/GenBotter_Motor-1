@@ -7,12 +7,15 @@
 
 // 相对于brush_motor_7新增
 #include "vofa_plus.h" // 引入VOFA+头文件，集成调试功能
+#include "pid_param_parse.h" // 引入PID参数解析器头文件，支持动态调参
 
 /* --- 全局变量定义 --- */
 PID_Handle_t hspeed_pid;                // 定义 PID 句柄实例
 static float filtered_rpm = 0.0f;       // 一阶低通滤波器状态变量，存储上一次滤波结果，初始为0
 static float target_rpm = 0.0f;         // 相对brush_motor_7新增：当前目标转速，供外部访问（如VOFA+显示）
 float final_output = 0.0f;              // 相对brush_motor_7新增：全局变量，存储死区补偿+限幅后的最终输出，供VOFA+显示
+
+PID_ParamParser_t speed_pid_parser;     // 相对brush_motor_8新增：定义全局的PID参数解析器（供usart.c调用）
 
 /**
  * @brief  速度环初始化
@@ -64,6 +67,33 @@ float SpeedLoop_GetActualRPM(void)
  */
 void SpeedLoop_Task(void)
 {
+
+        // 相对brush_motor_8新增：第一步解析PID参数指令
+    PID_ParseState_t parse_state = PID_ParamParser_Parse(&speed_pid_parser);
+    if (parse_state == PARSE_STATE_COMPLETE)
+    {
+        // 1. 获取解析后的参数
+        PID_Param_t new_param = PID_ParamParser_GetParam(&speed_pid_parser);
+        
+        // 2. 仅处理速度环的PID参数更新
+        if (new_param.ctrl_type == PID_CONTROLLER_SPEED)
+        {
+        // 调用PID控制器的参数更新函数（你之前新增的PID_UpdateParam）
+        PID_UpdateParam(&hspeed_pid, 
+                        new_param.kp, 
+                        new_param.ki, 
+                        new_param.kd, 
+                        new_param.max_out, 
+                        new_param.max_int);
+        
+        // 可选：回显参数（通过VOFA+发送，确认参数已更新）
+        // VOFA_TransmitPIDParam(&hspeed_pid); 
+        }
+        
+        // 3. 重置解析器，准备接收下一条指令
+        PID_ParamParser_Reset(&speed_pid_parser);
+    }
+
     // 1. 获取反馈并纠正方向
     // 注意：发现原来BSP_Encoder_GetSpeedRPM的返回值与实际旋转方向相反，所以改变原来的函数乘以-1
     float raw_rpm = BSP_Encoder_GetSpeedRPM(ENCODER_PM1); 

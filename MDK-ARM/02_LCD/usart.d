@@ -38,3 +38,7 @@
 02_lcd\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 02_lcd\usart.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 02_lcd\usart.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\stdio.h
+02_lcd\usart.o: ../Mid/Control/Inc/pid_param_parse.h
+02_lcd\usart.o: ../Mid/Control/Inc/pid_controller.h
+02_lcd\usart.o: ../Mid/Control/Inc/speed_loop.h
+02_lcd\usart.o: ../Mid/BSP/Inc/bsp_encoder.h

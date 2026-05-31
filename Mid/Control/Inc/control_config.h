@@ -27,8 +27,8 @@
 // 2. 再调KI：增大KI消除静态误差，注意不要超调过大
 // 3. 最后调KD：仅负载惯性极大时少量增加，否则设为0
 #define SPEED_PID_KP            0.6f  
-#define SPEED_PID_KI            0.2f 
-#define SPEED_PID_KD            0.02f  // 速度环通常不需要 D，除非负载惯性极大
+#define SPEED_PID_KI            0.10f 
+#define SPEED_PID_KD            0.06f  // 速度环通常不需要 D，除非负载惯性极大
 
 /* ================= 输出限制 ================= */
 // 你的 bsp_brush_motor.c 里 SetSpeed 接收 0-100

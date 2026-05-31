@@ -64,6 +64,17 @@ void PID_Init(PID_Handle_t *pid, float kp, float ki, float kd, float max_out, fl
 void PID_Reset(PID_Handle_t *pid); // 重置 PID 状态（误差、积分等）
 
 /**
+ * @brief 动态更新PID控制器参数
+ * @param pid       PID控制器句柄
+ * @param kp        新比例系数
+ * @param ki        新积分系数
+ * @param kd        新微分系数
+ * @param max_out   新输出限幅
+ * @param max_int   新积分限幅
+ */
+void PID_UpdateParam(PID_Handle_t *pid, float kp, float ki, float kd, float max_out, float max_int);
+
+/**
  * @brief 执行PID核心计算
  * @param pid      PID控制器句柄指针
  * @param target   控制目标值
