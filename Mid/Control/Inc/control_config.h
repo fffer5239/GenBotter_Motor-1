@@ -13,9 +13,9 @@
 #define __CONTROL_CONFIG_H
 
 /* ================= 硬件物理参数 ================= */
-// 控制周期：10ms (必须与 main.c 中 TIM6 的判断逻辑一致)
-#define CTRL_PERIOD_MS          10.0f 
-#define CTRL_PERIOD_S           0.01f  
+// 控制周期：100ms (必须与 main.c 中 TIM6 的判断逻辑一致)
+#define CTRL_PERIOD_MS          100.0f 
+#define CTRL_PERIOD_S           0.1f  
 
 // 电机死区补偿 (0-100)
 // 解释：PWM < 5% 时电机可能只有电流不转，需要切断防止发热
