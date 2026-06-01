@@ -117,6 +117,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+// 功能
+// LED指示
+// KEY0
+// 调速 — 在低/中/高三档速度间循环切换（100/400/1000）
+// KEY1
+// 换向 — 切换步进电机顺时针/逆时针旋转方向
+// LED1：亮=CW，灭=CCW
+// KEY2
+// 使能/禁用 — 切换步进电机的启停状态
+// LED2：亮=使能，灭=禁用
+// 注：KEY2只是切换步进电机的使能状态，不会改变电机的运行状态
     key_id = Key_Scan();
     if(key_id == KEY0_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
