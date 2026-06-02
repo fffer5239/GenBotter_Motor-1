@@ -15,10 +15,10 @@ const StepperMotorHwRes stepper_hw_res[STEPPER_SUM] = {
 
 // 步进电机的状态结构体数组
 static StepperStatus stepper_status[STEPPER_SUM] ={
-    {STEPPER_DISABLE, STEPPER_DIR_CW, 0, STEPPER_OK},
-    {STEPPER_DISABLE, STEPPER_DIR_CW, 0, STEPPER_OK},
-    {STEPPER_DISABLE, STEPPER_DIR_CW, 0, STEPPER_OK}, 
-    {STEPPER_DISABLE, STEPPER_DIR_CW, 0, STEPPER_OK}
+    {STEPPER_DISABLE, STEPPER_DIR_CW, 0, STEPPER_OK,0,0},
+    {STEPPER_DISABLE, STEPPER_DIR_CW, 0, STEPPER_OK,0,0},
+    {STEPPER_DISABLE, STEPPER_DIR_CW, 0, STEPPER_OK,0,0}, 
+    {STEPPER_DISABLE, STEPPER_DIR_CW, 0, STEPPER_OK,0,0}
 };
 
 StepperErrorCode Stepper_Init(StepperID id){
@@ -144,3 +144,106 @@ StepperErrorCode Stepper_GetStatus(StepperID id, StepperStatus *status){
     *status = stepper_status[id];
     return STEPPER_OK;
 };
+
+/**
+ * @brief       开启步进电机
+ * @param       motor_num: 步进电机接口序号
+ * @param       dir      : 步进电机旋转方向
+ * @retval      无
+ */
+void stepper_star(StepperID id, StepperDir dir)
+{
+    TIM_HandleTypeDef *tim_handle = stepper_hw_res[id].htim;
+    HAL_TIM_Base_Start_IT(tim_handle); // 开启TIM8的中断
+    switch(id)
+    {
+        case STEPPER_1 :
+        {
+            Stepper_SetDir(id, dir);
+            // PWM的占空比设置为50%
+            __HAL_TIM_SET_COMPARE(tim_handle, stepper_hw_res[id].tim_channel, STEPPER_PERIOD / 2);
+            HAL_TIM_GenerateEvent(tim_handle, TIM_EVENTSOURCE_UPDATE); //强制产生更新事件，使能PWM，因为有影子寄存器，所以需要强制产生更新事件，才能使能PWM
+            HAL_TIM_PWM_Start(tim_handle, stepper_hw_res[id].tim_channel);     /* 开启对应PWM通道 */
+            break;
+        }
+        case STEPPER_2 :
+        {
+            Stepper_SetDir(id, dir);
+            // PWM的占空比设置为50%
+            __HAL_TIM_SET_COMPARE(tim_handle, stepper_hw_res[id].tim_channel, STEPPER_PERIOD / 2);
+            HAL_TIM_GenerateEvent(tim_handle, TIM_EVENTSOURCE_UPDATE); //强制产生更新事件，使能PWM，因为有影子寄存器，所以需要强制产生更新事件，才能使能PWM
+            HAL_TIM_PWM_Start(tim_handle, stepper_hw_res[id].tim_channel);     /* 开启对应PWM通道 */
+            break;
+        }
+        case STEPPER_3 :
+        {
+            Stepper_SetDir(id, dir);
+            // PWM的占空比设置为50%
+            __HAL_TIM_SET_COMPARE(tim_handle, stepper_hw_res[id].tim_channel, STEPPER_PERIOD / 2);
+            HAL_TIM_GenerateEvent(tim_handle, TIM_EVENTSOURCE_UPDATE); //强制产生更新事件，使能PWM，因为有影子寄存器，所以需要强制产生更新事件，才能使能PWM
+            HAL_TIM_PWM_Start(tim_handle, stepper_hw_res[id].tim_channel);     /* 开启对应PWM通道 */
+            break;  
+        }
+        case STEPPER_4 :
+        {
+            Stepper_SetDir(id, dir);
+            // PWM的占空比设置为50%
+            __HAL_TIM_SET_COMPARE(tim_handle, stepper_hw_res[id].tim_channel, STEPPER_PERIOD / 2);
+            HAL_TIM_GenerateEvent(tim_handle, TIM_EVENTSOURCE_UPDATE); //强制产生更新事件，使能PWM，因为有影子寄存器，所以需要强制产生更新事件，才能使能PWM
+            HAL_TIM_PWM_Start(tim_handle, stepper_hw_res[id].tim_channel);     /* 开启对应PWM通道 */
+            break;
+        }
+        default : break;
+    }
+}
+
+/**
+ * @brief       将需要转动的角度转换成脉冲数
+ * @param       angle    : 需要转动的角度值
+ * @param       dir      : 旋转方向
+ * @param       motor_num: 步进电机接口序号
+ * @retval      无
+ */
+void stepper_set_angle(StepperID id, uint16_t angle)
+{
+    stepper_status[id].pulse_count = angle / MAX_STEP_ANGLE;
+    if(stepper_status[id].pulse_count == 0) 
+    {
+        Stepper_SetEnable(id, STEPPER_DISABLE);
+    }
+    else 
+    {
+    // stepper_star(motor_num,dir);
+    printf("angle: %d, pulse_count: %d\r\n", angle, stepper_status[id].pulse_count);
+    Stepper_SetEnable(id, STEPPER_ENABLE);
+    stepper_star(id, stepper_status[id].dir);
+    }
+}
+
+uint8_t g_run_flag = 0;
+/* 中断回调函数 */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if(htim->Instance==TIM8)
+    {
+        g_run_flag = 1;                             /* 标志位置一 */
+        stepper_status[STEPPER_1].pulse_count--;                    /* 每一个完整的脉冲就-- */
+        if(stepper_status[STEPPER_1].dir == STEPPER_DIR_CW)
+        {
+           stepper_status[STEPPER_1].add_pulse_count++;             /* 绝对位置++ */
+        }else
+        {
+           stepper_status[STEPPER_1].add_pulse_count--;             /* 绝对位置-- */
+        }
+
+        if(stepper_status[STEPPER_1].pulse_count == 0)                /* 当脉冲数等于1的时候 代表需要发送的脉冲个数已完成，停止定时器输出 */
+        {
+            // TIM_HandleTypeDef *tim_handle = stepper_hw_res[STEPPER_1].htim;
+            // HAL_TIM_PWM_Stop(tim_handle, stepper_hw_res[STEPPER_1].tim_channel);    
+            Stepper_SetEnable(STEPPER_1, STEPPER_DISABLE);
+            printf("all done, angle:%d, pulse_count:%d\r\n",(int)(stepper_status[STEPPER_1].add_pulse_count*MAX_STEP_ANGLE), 
+                   stepper_status[STEPPER_1].add_pulse_count);  /* 打印累计转动了多少角度 */
+            g_run_flag = 0;
+        }
+    }    
+}

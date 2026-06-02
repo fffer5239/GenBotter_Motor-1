@@ -110,9 +110,9 @@ int main(void)
   uint8_t speed_gear = 0;                             // 速度挡位，0-低速，1-中速，2-高速
   StepperDir current_dir = STEPPER_DIR_CW;            // 步进电机的旋转方向，cw为顺时针，ccw为逆时针
   StepperEnableState current_enable = STEPPER_ENABLE; // 步进电机的使能状态，enable为使能，disable为禁用
-  uint16_t speed_table[3] = {100, 1600, 3200};
-  uint32_t motor_start_tick = 0;                      // 电机启动时间戳
-  uint8_t motor_running = 0;                          // 电机是否正在运行的标志
+  uint16_t speed_table[3] = {360, 360, 360};
+//  uint32_t motor_start_tick = 0;                      // 电机启动时间戳
+//  uint8_t motor_running = 0;                          // 电机是否正在运行的标志
   uint32_t apb2_freq_LCD = HAL_RCC_GetPCLK2Freq();
   lcd_show_num(10, 85, apb2_freq_LCD, 10, 24, RED);
   printf("Hello World!\n");
@@ -143,16 +143,14 @@ int main(void)
         lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
          // 调速的操作
         if(current_enable == STEPPER_ENABLE){
-          if(speed_gear > 2){
-            speed_gear = 2;
-          }
-          Stepper_SetSpeed(STEPPER_1, speed_table[speed_gear]);
+          // Stepper_SetSpeed(STEPPER_1, speed_table[speed_gear]);
+          stepper_set_angle(STEPPER_1, speed_table[speed_gear]);
           speed_gear++;
           if(speed_gear > 2){
             speed_gear = 0;
           }
-          motor_start_tick = HAL_GetTick();  // 记录启动时间
-          motor_running = 1;                 // 标记电机运行中
+//          motor_start_tick = HAL_GetTick();  // 记录启动时间
+//          motor_running = 1;                 // 标记电机运行中
         }
     }
     else if(key_id == KEY1_Pressed){
@@ -176,19 +174,21 @@ int main(void)
         if (current_enable == STEPPER_ENABLE)
         {
           Led_On(LED2);
+          printf("stepper1 enable\r\n");
         }
         else
         {
           Led_Off(LED2);
+          printf("stepper1 disable\r\n");
         }
     }
 
-    // 电机运行超时检测，运行1秒后自动停止
-    if(motor_running && (HAL_GetTick() - motor_start_tick >= 1000)){
-        Stepper_SetSpeed(STEPPER_1, 0);  // 1秒后停机
+    // // 电机运行超时检测，运行1秒后自动停止
+    // if(motor_running && (HAL_GetTick() - motor_start_tick >= 1000)){
+    //     Stepper_SetSpeed(STEPPER_1, 0);  // 1秒后停机
 
-        motor_running = 0;
-    }
+    //     motor_running = 0;
+    // }
   }
   /* USER CODE END 3 */
 }

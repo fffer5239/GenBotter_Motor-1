@@ -61,6 +61,13 @@ extern TIM_HandleTypeDef htim8;
 #define STEPPER_MIN_RPM  1
 #define STEPPER_MAX_RPM  30000
 
+/* 步进电机参数相关宏 */
+#define PULSE_REV       3200.0              /* 每圈脉冲数（细分数16） */
+#define MAX_STEP_ANGLE  0.1125               /* 最小步距(1.8/PULSE_REV) */
+
+#define STEPPER_PRESCALER  168 //预分频系数 */
+#define STEPPER_PERIOD    1000 //PWM周期 */
+
 /**一些enum**/
 //步进电机接口组的ID
 typedef enum{
@@ -106,10 +113,15 @@ typedef struct{
 // 步进电机工作状态的结构体
 typedef struct{
     StepperEnableState enable;
-    StepperDir dir;
-    uint32_t speed;
+    StepperDir dir;           /* 方向 */
+    uint32_t speed;           /* 设置需要旋转的角度 */
     StepperErrorCode error; //最近的错误码
+    volatile uint32_t pulse_count;          /* 脉冲个数记录 */
+    volatile int add_pulse_count;           /* 脉冲个数累计 */  
 }StepperStatus;
+
+
+ 
 
 /* 一些接口函数的声明 */
 StepperErrorCode Stepper_Init(StepperID id);
@@ -117,5 +129,7 @@ StepperErrorCode Stepper_SetSpeed(StepperID id, uint32_t speed); //步进电机�
 StepperErrorCode Stepper_SetDir(StepperID id, StepperDir dir);
 StepperErrorCode Stepper_SetEnable(StepperID id, StepperEnableState enable);
 StepperErrorCode Stepper_GetStatus(StepperID id, StepperStatus *status);
+
+void stepper_set_angle(StepperID id, uint16_t angle);/* 将角度转换成脉冲个数 */
 
 #endif /* __STEPPER_MOTOR_H_ */
