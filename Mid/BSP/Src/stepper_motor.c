@@ -384,6 +384,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
             switch(g_srd.run_state)                         /* 加减速曲线阶段 */
             {
             case STOP:
+                g_add_pulse_count++;
                 step_count = 0;                             /* 清零步数计数器 */
                 rest = 0;                                   /* 清零余值 */
                 /* 关闭通道*/
@@ -456,7 +457,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
                 rest = ((2 * g_srd.step_delay)+rest)%(4 * g_srd.accel_count + 1);                                   /* 计算余数，下次计算补上余数，减少误差 */
 
                 /* 检查是否为最后一步 */
-                if(g_srd.accel_count >= 0)                  /* 判断减速步数是否从负值加到0是的话 减速完成 */
+                if(g_srd.accel_count >= -1)                  /* 判断减速步数是否从负值加到0是的话 减速完成 */
                 {
                     g_srd.run_state = STOP;
                 }
@@ -466,3 +467,4 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
         }
     }
 }
+/********************************************梯形加减速***********************************************/

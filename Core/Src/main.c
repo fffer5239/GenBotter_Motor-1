@@ -130,49 +130,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 // 功能
-    // key_id = Key_Scan();
-    // if(key_id == KEY0_Pressed){
-    //     lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
-    //      // 调速的操作
-    //     if(current_enable == STEPPER_ENABLE){
-    //       // Stepper_SetSpeed(STEPPER_1, speed_table[speed_gear]);
-    //       stepper_set_angle(STEPPER_1, speed_table[speed_gear]);
-    //       speed_gear++;
-    //       if(speed_gear > 2){
-    //         speed_gear = 0;
-    //       }
 
-    //     }
-    // }
-    // else if(key_id == KEY1_Pressed){
-    //     lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
-    //     // 旋转方向的操作
-    //     current_dir = current_dir == STEPPER_DIR_CW ? STEPPER_DIR_CCW : STEPPER_DIR_CW;
-    //     Stepper_SetDir(STEPPER_1, current_dir);
-    //     // 用LED0标识方向，cw亮、ccw熄灭
-    //     if(current_dir == STEPPER_DIR_CW){
-    //       Led_On(LED1);
-    //     }
-    //     else{
-    //       Led_Off(LED1);
-    //     }
-    // }
-    // else if(key_id == KEY2_Pressed){
-    //     lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
-    //     current_enable = current_enable == STEPPER_ENABLE ? STEPPER_DISABLE : STEPPER_ENABLE;
-    //     Stepper_SetEnable(STEPPER_1, current_enable);
-    //     // 用LED1标识步进Enable，enable亮、disable熄灭
-    //     if (current_enable == STEPPER_ENABLE)
-    //     {
-    //       Led_On(LED2);
-    //       printf("stepper1 enable\r\n");
-    //     }
-    //     else
-    //     {
-    //       Led_Off(LED2);
-    //       printf("stepper1 disable\r\n");
-    //     }
-    // }
 
 
         t++;
@@ -192,7 +150,7 @@ int main(void)
         }
         else if(key_id == KEY1_Pressed)                                       /* 增加步数 */
         {
-            g_step_angle+=10;
+            g_step_angle+=1;
             if(g_step_angle>100)  g_step_angle=1;
         }
         else if(key_id == KEY2_Pressed)                                       /* 减少步数 */
