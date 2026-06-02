@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 #include "fsmc.h"
 
@@ -27,6 +28,7 @@
 #include "lcd.h"
 #include "key_led.h"
 #include "stepper_motor.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,6 +94,7 @@ int main(void)
   MX_GPIO_Init();
   MX_FSMC_Init();
   MX_TIM8_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   DWT_Init(); // 初始化DWT
 
@@ -100,14 +103,21 @@ int main(void)
   lcd_init();
   
   lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
-  lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
+  // lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
 
   KeyPressedID key_id = KEY_None;
 
   uint8_t speed_gear = 0;                             // 速度挡位，0-低速，1-中速，2-高速
   StepperDir current_dir = STEPPER_DIR_CW;            // 步进电机的旋转方向，cw为顺时针，ccw为逆时针
   StepperEnableState current_enable = STEPPER_ENABLE; // 步进电机的使能状态，enable为使能，disable为禁用
-  uint16_t speed_table[3] = {100, 400, 1000};
+  uint16_t speed_table[3] = {100, 1600, 3200};
+  uint32_t motor_start_tick = 0;                      // 电机启动时间戳
+  uint8_t motor_running = 0;                          // 电机是否正在运行的标志
+  uint32_t apb2_freq_LCD = HAL_RCC_GetPCLK2Freq();
+  lcd_show_num(10, 85, apb2_freq_LCD, 10, 24, RED);
+  printf("Hello World!\n");
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -141,6 +151,8 @@ int main(void)
           if(speed_gear > 2){
             speed_gear = 0;
           }
+          motor_start_tick = HAL_GetTick();  // 记录启动时间
+          motor_running = 1;                 // 标记电机运行中
         }
     }
     else if(key_id == KEY1_Pressed){
@@ -169,7 +181,14 @@ int main(void)
         {
           Led_Off(LED2);
         }
-    }  
+    }
+
+    // 电机运行超时检测，运行1秒后自动停止
+    if(motor_running && (HAL_GetTick() - motor_start_tick >= 1000)){
+        Stepper_SetSpeed(STEPPER_1, 0);  // 1秒后停机
+
+        motor_running = 0;
+    }
   }
   /* USER CODE END 3 */
 }
