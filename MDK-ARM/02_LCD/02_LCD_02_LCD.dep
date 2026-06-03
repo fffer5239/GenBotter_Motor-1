@@ -1,7 +1,7 @@
 Dependencies for Project '02_LCD', Target '02_LCD': (DO NOT MODIFY !)
 CompilerVersion: 5060960::V5.06 update 7 (build 960)::.\ARMCC
-F (startup_stm32f407xx.s)(0x6A1E5E27)(--cpu Cortex-M4.fp.sp -g --apcs=interwork --pd "__MICROLIB SETA 1"-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include--pd "__UVISION_VERSION SETA 538" --pd "_RTE_ SETA 1" --pd "STM32F407xx SETA 1" --pd "_RTE_ SETA 1"--list startup_stm32f407xx.lst --xref -o 02_lcd\startup_stm32f407xx.o --depend 02_lcd\startup_stm32f407xx.d)
-F (../Core/Src/main.c)(0x6A1E5EDC)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\main.o --omf_browse 02_lcd\main.crf --depend 02_lcd\main.d)
+F (startup_stm32f407xx.s)(0x6A1ECCE6)(--cpu Cortex-M4.fp.sp -g --apcs=interwork --pd "__MICROLIB SETA 1"-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include--pd "__UVISION_VERSION SETA 538" --pd "_RTE_ SETA 1" --pd "STM32F407xx SETA 1" --pd "_RTE_ SETA 1"--list startup_stm32f407xx.lst --xref -o 02_lcd\startup_stm32f407xx.o --depend 02_lcd\startup_stm32f407xx.d)
+F (../Core/Src/main.c)(0x6A1EE739)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\main.o --omf_browse 02_lcd\main.crf --depend 02_lcd\main.d)
 I (../Core/Inc/main.h)(0x6A1CFF8B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x6A15888A)
 I (../Core/Inc/stm32f4xx_hal_conf.h)(0x6A1DA18C)
@@ -43,7 +43,7 @@ I (../Mid/BSP/Inc/lcd.h)(0x69F5B4AD)
 I (D:\softinstall\keil\Core\ARM\ARMCC\include\stdlib.h)(0x60252374)
 I (../Mid/BSP/Inc/delay.h)(0x69F5B4AD)
 I (../Mid/BSP/Inc/key_led.h)(0x6A0AD831)
-I (../Mid/BSP/Inc/stepper_motor.h)(0x6A1CFF8C)
+I (../Mid/BSP/Inc/stepper_motor.h)(0x6A1EA94F)
 I (D:\softinstall\keil\Core\ARM\ARMCC\include\stdio.h)(0x60252374)
 F (../Core/Src/gpio.c)(0x6A1DA18A)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\gpio.o --omf_browse 02_lcd\gpio.crf --depend 02_lcd\gpio.d)
 I (../Core/Inc/gpio.h)(0x69FB0194)
@@ -115,7 +115,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x6A15888A)
-F (../Core/Src/tim.c)(0x6A1E5E25)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\tim.o --omf_browse 02_lcd\tim.crf --depend 02_lcd\tim.d)
+F (../Core/Src/tim.c)(0x6A1ECCE4)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\tim.o --omf_browse 02_lcd\tim.crf --depend 02_lcd\tim.d)
 I (../Core/Inc/tim.h)(0x6A1CFF8B)
 I (../Core/Inc/main.h)(0x6A1CFF8B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x6A15888A)
@@ -186,7 +186,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x6A15888A)
 I (D:\softinstall\keil\Core\ARM\ARMCC\include\stdio.h)(0x60252374)
-F (../Core/Src/stm32f4xx_it.c)(0x6A1CFF8B)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\stm32f4xx_it.o --omf_browse 02_lcd\stm32f4xx_it.crf --depend 02_lcd\stm32f4xx_it.d)
+F (../Core/Src/stm32f4xx_it.c)(0x6A1EA6A5)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\stm32f4xx_it.o --omf_browse 02_lcd\stm32f4xx_it.crf --depend 02_lcd\stm32f4xx_it.d)
 I (../Core/Inc/main.h)(0x6A1CFF8B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x6A15888A)
 I (../Core/Inc/stm32f4xx_hal_conf.h)(0x6A1DA18C)
@@ -220,7 +220,7 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x6A15888A)
-I (../Core/Inc/stm32f4xx_it.h)(0x6A1CFF8B)
+I (../Core/Inc/stm32f4xx_it.h)(0x6A1EA6A6)
 F (../Core/Src/stm32f4xx_hal_msp.c)(0x6A1D9364)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\stm32f4xx_hal_msp.o --omf_browse 02_lcd\stm32f4xx_hal_msp.crf --depend 02_lcd\stm32f4xx_hal_msp.d)
 I (../Core/Inc/main.h)(0x6A1CFF8B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x6A15888A)
@@ -1091,8 +1091,8 @@ I (../Mid/BSP/Inc/delay.h)(0x69F5B4AD)
 I (../Mid/BSP/Inc/lcdfont.h)(0x69F5B4AD)
 I (../Core/Inc/fsmc.h)(0x69FB02D9)
 I (..\Mid\BSP\Src\lcd_ex.c)(0x69F5B4AD)
-F (..\Mid\BSP\Src\stepper_motor.c)(0x6A1DB059)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\stepper_motor.o --omf_browse 02_lcd\stepper_motor.crf --depend 02_lcd\stepper_motor.d)
-I (../Mid/BSP/Inc/stepper_motor.h)(0x6A1CFF8C)
+F (..\Mid\BSP\Src\stepper_motor.c)(0x6A1EE782)(--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../Mid/BSP/Inc-I.\RTE\_02_LCD-ID:\softinstall\keil\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-ID:\softinstall\keil\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="538" -D_RTE_ -DSTM32F407xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F407xx-o 02_lcd\stepper_motor.o --omf_browse 02_lcd\stepper_motor.crf --depend 02_lcd\stepper_motor.d)
+I (../Mid/BSP/Inc/stepper_motor.h)(0x6A1EA94F)
 I (../Core/Inc/main.h)(0x6A1CFF8B)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x6A15888A)
 I (../Core/Inc/stm32f4xx_hal_conf.h)(0x6A1DA18C)
@@ -1127,3 +1127,4 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h)(0x6A15888A)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x6A15888A)
 I (D:\softinstall\keil\Core\ARM\ARMCC\include\stdio.h)(0x60252374)
+I (D:\softinstall\keil\Core\ARM\ARMCC\include\math.h)(0x60252378)

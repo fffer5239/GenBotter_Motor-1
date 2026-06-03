@@ -60,7 +60,11 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+__IO uint32_t g_set_speed  = 1000;          /* 最大速度 单位为0.1rad/sec */
+__IO uint32_t g_step_accel = 25;            /* 加速度 单位为0.1rad/sec^2 */
+__IO uint32_t g_step_decel = 20;            /* 减速度 单位为0.1rad/sec^2 */
+__IO uint16_t g_step_angle = 0;             /* 设置的圈数，传入时再转换成步数*/
+extern __IO uint32_t g_add_pulse_count;     /* 脉冲个数累计*/
 /* USER CODE END 0 */
 
 /**
@@ -106,16 +110,14 @@ int main(void)
   // lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
 
   KeyPressedID key_id = KEY_None;
-
-  uint8_t speed_gear = 0;                             // 速度挡位，0-低速，1-中速，2-高速
-  StepperDir current_dir = STEPPER_DIR_CW;            // 步进电机的旋转方向，cw为顺时针，ccw为逆时针
-  StepperEnableState current_enable = STEPPER_ENABLE; // 步进电机的使能状态，enable为使能，disable为禁用
-  uint16_t speed_table[3] = {100, 1600, 3200};
-  uint32_t motor_start_tick = 0;                      // 电机启动时间戳
-  uint8_t motor_running = 0;                          // 电机是否正在运行的标志
+  uint8_t t;
+  char buf[32];
   uint32_t apb2_freq_LCD = HAL_RCC_GetPCLK2Freq();
   lcd_show_num(10, 85, apb2_freq_LCD, 10, 24, RED);
   printf("Hello World!\n");
+  printf("KEY0开启梯形加减速\r\n");
+  printf("KEY1 add step\r\n");
+  printf("KEY2 sub step\r\n");
 
 
   /* USER CODE END 2 */
@@ -128,67 +130,36 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 // 功能
-// LED指示
-// KEY0
-// 调速 — 在低/中/高三档速度间循环切换（100/400/1000）
-// KEY1
-// 换向 — 切换步进电机顺时针/逆时针旋转方向
-// LED1：亮=CW，灭=CCW
-// KEY2
-// 使能/禁用 — 切换步进电机的启停状态
-// LED2：亮=使能，灭=禁用
-// 注：KEY2只是切换步进电机的使能状态，不会改变电机的运行状态
-    key_id = Key_Scan();
-    if(key_id == KEY0_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
-         // 调速的操作
-        if(current_enable == STEPPER_ENABLE){
-          if(speed_gear > 2){
-            speed_gear = 2;
-          }
-          Stepper_SetSpeed(STEPPER_1, speed_table[speed_gear]);
-          speed_gear++;
-          if(speed_gear > 2){
-            speed_gear = 0;
-          }
-          motor_start_tick = HAL_GetTick();  // 记录启动时间
-          motor_running = 1;                 // 标记电机运行中
-        }
-    }
-    else if(key_id == KEY1_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
-        // 旋转方向的操作
-        current_dir = current_dir == STEPPER_DIR_CW ? STEPPER_DIR_CCW : STEPPER_DIR_CW;
-        Stepper_SetDir(STEPPER_1, current_dir);
-        // 用LED0标识方向，cw亮、ccw熄灭
-        if(current_dir == STEPPER_DIR_CW){
-          Led_On(LED1);
-        }
-        else{
-          Led_Off(LED1);
-        }
-    }
-    else if(key_id == KEY2_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
-        current_enable = current_enable == STEPPER_ENABLE ? STEPPER_DISABLE : STEPPER_ENABLE;
-        Stepper_SetEnable(STEPPER_1, current_enable);
-        // 用LED1标识步进Enable，enable亮、disable熄灭
-        if (current_enable == STEPPER_ENABLE)
-        {
-          Led_On(LED2);
-        }
-        else
-        {
-          Led_Off(LED2);
-        }
-    }
 
-    // 电机运行超时检测，运行1秒后自动停止
-    if(motor_running && (HAL_GetTick() - motor_start_tick >= 1000)){
-        Stepper_SetSpeed(STEPPER_1, 0);  // 1秒后停机
 
-        motor_running = 0;
-    }
+
+        t++;
+        if(t % 200 == 0)
+        {            
+            sprintf(buf,"Set_Aangle:%d     ",g_step_angle);             /* 设置的旋转位置（角度）*/
+            lcd_show_string(10,50,300,32,32,buf,RED);
+            sprintf(buf,"Add_Aangle:%.2f    ",g_add_pulse_count*0.1125); /* 累计旋转的角度 */
+            lcd_show_string(10,110,300,32,32,buf,RED);
+            Led_Toggle(LED1);                                              /* LED1(红灯) 翻转 */        
+        }
+        key_id = Key_Scan();
+        if(key_id == KEY0_Pressed)                                            /* 开启梯形加减速 */
+        {
+            create_t_ctrl_param(SPR*g_step_angle, g_step_accel, g_step_decel, g_set_speed);
+            g_add_pulse_count=0;
+        }
+        else if(key_id == KEY1_Pressed)                                       /* 增加步数 */
+        {
+            g_step_angle+=1;
+            if(g_step_angle>100)  g_step_angle=1;
+        }
+        else if(key_id == KEY2_Pressed)                                       /* 减少步数 */
+        {
+            g_step_angle-=10;
+            if(g_step_angle<1)  g_step_angle=100;
+        }
+
+
   }
   /* USER CODE END 3 */
 }
