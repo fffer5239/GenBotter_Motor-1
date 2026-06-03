@@ -63,7 +63,7 @@ void SystemClock_Config(void);
 __IO uint32_t g_set_speed  = 1000;          /* 最大速度 单位为0.1rad/sec */
 __IO uint32_t g_step_accel = 25;            /* 加速度 单位为0.1rad/sec^2 */
 __IO uint32_t g_step_decel = 20;            /* 减速度 单位为0.1rad/sec^2 */
-__IO uint16_t g_step_angle = 0;             /* 设置的步数*/
+__IO uint16_t g_step_angle = 0;             /* 设置的圈数，传入时再转换成步数*/
 extern __IO uint32_t g_add_pulse_count;     /* 脉冲个数累计*/
 /* USER CODE END 0 */
 

@@ -258,7 +258,7 @@ __IO uint32_t g_add_pulse_count   = 0;                    /* 脉冲个数累计 
 
 /*
  * @brief       生成梯形运动控制参数
- * @param       step：移动的步数 (正数为顺时针，负数为逆时针).
+ * @param       step：移动的圈数，传入时再转换成步数。 (正数为顺时针，负数为逆时针).
  * @param       accel  加速度,实际值为accel*0.1*rad/sec^2  10倍并且2个脉冲算一个完整的周期
  * @param       decel  减速度,实际值为decel*0.1*rad/sec^2
  * @param       speed  最大速度,实际值为speed*0.1*rad/sec
@@ -267,8 +267,8 @@ __IO uint32_t g_add_pulse_count   = 0;                    /* 脉冲个数累计 
 void create_t_ctrl_param(int32_t step, uint32_t accel, uint32_t decel, uint32_t speed)
 {
     __IO uint16_t tim_count;        /* 达到最大速度时的步数*/
-    __IO uint32_t max_s_lim;        /* 必须要开始减速的步数（如果加速没有达到最大速度）*/
-    __IO uint32_t accel_lim;
+    __IO uint32_t max_s_lim;        /* 必须要开始减速的步数（如果加速没有达到最大速度）/ 速度从 0 加速到 Max_w 所需要的步数，也就是与最大速度的交点*/
+    __IO uint32_t accel_lim;        /*加速度曲线与减速度曲线的相交点*/
     TIM_HandleTypeDef *tim_handle = stepper_hw_res[STEPPER_1].htim;  /* 获取定时器句柄 */
     if(g_motion_sta != STOP)        /* 只允许步进电机在停止的时候才继续*/
         return;
@@ -307,25 +307,27 @@ void create_t_ctrl_param(int32_t step, uint32_t accel, uint32_t decel, uint32_t 
         {
             max_s_lim = 1;
         }
-        accel_lim = (uint32_t)(step*decel/(accel+decel));       /* 这里不限制最大速度 计算多少步之后我们必须开始减速 n1 = (n1+n2)decel / (accel + decel) */
+        accel_lim = (uint32_t)(step*decel/(accel+decel));       /* 加速度曲线与减速度曲线的相交点，这里不限制最大速度 计算多少步之后我们必须开始减速 n1 = (n1+n2)decel / (accel + decel) */
 
         if(accel_lim == 0)                                      /* 不足一步 按一步处理*/
         {
             accel_lim = 1;
         }
-        if(accel_lim <= max_s_lim)                              /* 加速阶段到不了最大速度就得减速。。。使用限制条件我们可以计算出减速阶段步数 */
+        /*三角形曲线或者正常梯形曲线的减速段步数计算*/
+        if(accel_lim <= max_s_lim)                              /* 三角形曲线，加速阶段到不了最大速度就得减速。使用限制条件我们可以计算出减速阶段步数 */
         {
-            g_srd.decel_val = accel_lim - step;                 /* 减速段的步数 */
+            g_srd.decel_val = accel_lim - step;                 /* 三角形曲线减速段的步数 原始公式为g_srd.decel_val = step - accel_lim; 要其为负值*/
         }
-        else
+        else                                                    /* 正常的梯形曲线，加速阶段到最大速度后做匀速运动。使用限制条件我们可以计算出减速阶段步数 */
         {
-            g_srd.decel_val = -(max_s_lim*accel/decel);         /* 减速段的步数 */
+            g_srd.decel_val = -(max_s_lim*accel/decel);         /* 正常梯形曲线减速段的步数 */
         }
         if(g_srd.decel_val == 0)                                /* 不足一步 按一步处理 */
         {
             g_srd.decel_val = -1;
         }
-        g_srd.decel_start = step + g_srd.decel_val;             /* 计算开始减速时的步数 */
+
+        g_srd.decel_start = step + g_srd.decel_val;             /* 计算开始减速时的步数，g_srd.decel_val为负值*/
         
         
         if(g_srd.step_delay <= g_srd.min_delay)                 /* 如果一开始c0的速度比匀速段速度还大，就不需要进行加速运动，直接进入匀速 */
@@ -405,14 +407,15 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
                     g_step_position--;                      /* 绝对位置减1*/
                 }
                 g_srd.accel_count++;                        /* 加速计数值加1*/
+                /*泰勒公式的一个特例麦克劳林公式推导得来*/
                 new_step_delay = g_srd.step_delay - (((2 *g_srd.step_delay) + rest)/(4 * g_srd.accel_count + 1));/* 计算新(下)一步脉冲周期(时间间隔) */
                 rest = ((2 * g_srd.step_delay)+rest)%(4 * g_srd.accel_count + 1);                                /* 计算余数，下次计算补上余数，减少误差 */
-                if(step_count >= g_srd.decel_start)         /* 检查是否到了需要减速的步数 */
+                if(step_count >= g_srd.decel_start)         /* 三角形曲线，检查是否到了需要减速的步数 */
                 {
                     g_srd.accel_count = g_srd.decel_val;    /* 加速计数值为减速阶段计数值的初始值 */
                     g_srd.run_state = DECEL;                /* 下个脉冲进入减速阶段 */
                 }
-                else if(new_step_delay <= g_srd.min_delay)  /* 检查是否到达期望的最大速度 计数值越小速度越快，当你的速度和最大速度相等或更快就进入匀速*/
+                else if(new_step_delay <= g_srd.min_delay)  /* 梯形曲线，检查是否到达期望的最大速度 计数值越小速度越快，当你的速度和最大速度相等或更快就进入匀速*/
                 {
                     last_accel_delay = new_step_delay;      /* 保存加速过程中最后一次延时（脉冲周期）*/
                     new_step_delay = g_srd.min_delay;       /* 使用min_delay（对应最大速度speed）*/
@@ -453,7 +456,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
                     g_step_position--;                      /* 绝对位置减1 */
                 }
                 g_srd.accel_count++;
-                new_step_delay = g_srd.step_delay - (((2 * g_srd.step_delay) + rest)/(4 * g_srd.accel_count + 1));  /* 计算新(下)一步脉冲周期(时间间隔) */
+                new_step_delay = g_srd.step_delay - (((2 * g_srd.step_delay) + rest)/(4 * g_srd.accel_count + 1));  /* 计算新(下)一步脉冲周期(时间间隔)，类型为整形，固有余数*/
                 rest = ((2 * g_srd.step_delay)+rest)%(4 * g_srd.accel_count + 1);                                   /* 计算余数，下次计算补上余数，减少误差 */
 
                 /* 检查是否为最后一步 */
