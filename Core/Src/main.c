@@ -60,11 +60,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-__IO uint32_t g_set_speed  = 1000;          /* 最大速度 单位为0.1rad/sec */
-__IO uint32_t g_step_accel = 25;            /* 加速度 单位为0.1rad/sec^2 */
-__IO uint32_t g_step_decel = 20;            /* 减速度 单位为0.1rad/sec^2 */
-__IO uint16_t g_step_angle = 0;             /* 设置的圈数，传入时再转换成步数*/
-extern __IO uint32_t g_add_pulse_count;     /* 脉冲个数累计*/
+extern uint8_t g_run_flag;
 /* USER CODE END 0 */
 
 /**
@@ -111,9 +107,10 @@ int main(void)
 
   KeyPressedID key_id = KEY_None;
   uint8_t t;
+  int angle = 0;
   char buf[32];
-  uint32_t apb2_freq_LCD = HAL_RCC_GetPCLK2Freq();
-  lcd_show_num(10, 85, apb2_freq_LCD, 10, 24, RED);
+  // uint32_t apb2_freq_LCD = HAL_RCC_GetPCLK2Freq();
+  // lcd_show_num(10, 85, apb2_freq_LCD, 10, 24, RED);
   printf("Hello World!\n");
   printf("KEY0开启梯形加减速\r\n");
   printf("KEY1 add step\r\n");
@@ -132,31 +129,57 @@ int main(void)
 // 功能
 
 
-
+         key_id = Key_Scan();
+        if(key_id == KEY0_Pressed)                                /* 按下KEY0增加旋转角度 */
+        {
+            if(g_run_flag == 0)
+            {
+                angle += 90;
+                if(angle >= 0)
+                {
+                  Stepper_SetDir(STEPPER_1,STEPPER_DIR_CW);
+                }else 
+                {
+                  Stepper_SetDir(STEPPER_1,STEPPER_DIR_CCW);
+                }
+                sprintf(buf, "angle:%d\r\n",angle);            
+                printf(buf);
+                lcd_show_string(10, 85, 300, 32, 32, buf, BLUE);
+            }
+        }
+        else if(key_id == KEY1_Pressed)                           /* 按下KEY1减少旋转角度 */
+        {
+            if(g_run_flag == 0)
+            {
+               angle -= 90;
+                if(angle >= 0)
+                {
+                  Stepper_SetDir(STEPPER_1,STEPPER_DIR_CW);
+                  
+                }else 
+                {
+                  Stepper_SetDir(STEPPER_1,STEPPER_DIR_CCW);
+                }
+                sprintf(buf, "angle:%d\r\n",angle); 
+                printf(buf);
+                lcd_show_string(10, 85, 300, 32, 32, buf, BLUE);
+            }
+        }
+        else if(key_id == KEY2_Pressed)                           /* 按下KEY2开启电机 */
+        {         
+            if(g_run_flag == 0)
+            {
+                stepper_set_angle(STEPPER_1, angle); /* 开启旋转 */
+                angle = 0;                                  /* 角度清0，以便下次设置 */
+                printf("start!\r\n");
+                sprintf(buf, "start!\r\n");
+                lcd_show_string(10, 120, 300, 32, 32, buf, GREEN);
+            }                
+        }
         t++;
         if(t % 200 == 0)
-        {            
-            sprintf(buf,"Set_Aangle:%d     ",g_step_angle);             /* 设置的旋转位置（角度）*/
-            lcd_show_string(10,50,300,32,32,buf,RED);
-            sprintf(buf,"Add_Aangle:%.2f    ",g_add_pulse_count*0.1125); /* 累计旋转的角度 */
-            lcd_show_string(10,110,300,32,32,buf,RED);
-            Led_Toggle(LED1);                                              /* LED1(红灯) 翻转 */        
-        }
-        key_id = Key_Scan();
-        if(key_id == KEY0_Pressed)                                            /* 开启梯形加减速 */
         {
-            create_t_ctrl_param(SPR*g_step_angle, g_step_accel, g_step_decel, g_set_speed);
-            g_add_pulse_count=0;
-        }
-        else if(key_id == KEY1_Pressed)                                       /* 增加步数 */
-        {
-            g_step_angle+=1;
-            if(g_step_angle>100)  g_step_angle=1;
-        }
-        else if(key_id == KEY2_Pressed)                                       /* 减少步数 */
-        {
-            g_step_angle-=10;
-            if(g_step_angle<1)  g_step_angle=100;
+            Led_Toggle(LED1);                                  /* LED0(红灯) 翻转 */        
         }
 
 
