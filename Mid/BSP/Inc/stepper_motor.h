@@ -5,6 +5,54 @@
 
 /**一些宏定义**/
 
+
+
+/*************************************S型加减速参数**********************************************/
+
+#define T1_FREQ                 (168000000/168)                         /* 频率ft值 */
+#define FSPR                    200                                     /* 步进电机单圈步数 */
+#define MICRO_STEP              16                                      /* 细分 */
+#define SPR                     (FSPR * MICRO_STEP)                     /* 单圈所需要的脉冲数 */
+
+#define ROUNDPS_2_STEPPS(rpm)   ((rpm) * SPR / 60)                      /* 根据电机转速（r/min），计算电机步速（step/s） */
+#define MIDDLEVELOCITY(vo,vt)   ( ( (vo) + (vt) ) / 2 )                 /* S型加减速加速段的中点速度  */
+#define INCACCEL(vo,v,t)        ( ( 2 * ((v) - (vo)) ) / pow((t),2) )   /* 加加速度:加速度增加量   V - V0 = 1/2 * J * t^2 */
+#define INCACCELSTEP(j,t)       ( ( (j) * pow( (t) , 3 ) ) / 6.0f )     /* 加加速段的位移量(步数)  S = 1/6 * J * t^3 */
+#define ACCEL_TIME(t)           ( (t) / 2 )                             /* 加加速段和减加速段的时间是相等的 */
+#define SPEED_MIN               (T1_FREQ / (65535.0f))                  /* 最低频率/速度 */
+
+#ifndef TRUE
+#define TRUE                    1
+#endif
+#ifndef FALSE
+#define FALSE                   0
+#endif
+
+typedef struct {
+    int32_t vo;             /*  初速度 单位 step/s */
+    int32_t vt;             /*  末速度 单位 step/s */
+    int32_t accel_step;     /*  加速段的步数单位 step */
+    int32_t decel_step;     /*  加速段的步数单位 step */
+    float   *accel_tab;     /*  速度表格 单位 step/s 步进电机的脉冲频率 */
+    float   *decel_tab;     /*  速度表格 单位 step/s 步进电机的脉冲频率 */
+    float   *ptr;           /*  速度指针 */
+    int32_t dec_point;      /*  减速点 */
+    int32_t step;
+    int32_t step_pos;
+} speed_calc_t;
+
+typedef enum
+{
+    STATE_ACCEL = 1,        /* 电机加速状态 */
+    STATE_AVESPEED = 2,     /* 电机匀速状态 */
+    STATE_DECEL = 3,        /* 电机减速状态 */
+    STATE_STOP = 0,         /* 电机停止状态 */
+    STATE_IDLE = 4,         /* 电机空闲状态 */
+} motor_state_typedef;
+
+/*************************************S型加减速参数**********************************************/
+
+
 extern TIM_HandleTypeDef htim8;
 
 /*硬件资源的宏定义*/

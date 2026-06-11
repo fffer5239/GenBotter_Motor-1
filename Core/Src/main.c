@@ -29,6 +29,10 @@
 #include "key_led.h"
 #include "stepper_motor.h"
 #include "stdio.h"
+#include "stepper_motor.h"
+#include "malloc.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +47,14 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+#define V_END           300                 /* 末速度 */
+#define V_START         0                   /* 初速度 */
+#define ACCELTIME       3.5f                /* 加速时间 (s) */
+#define DECEELTIME      1.5f                /* 减速时间 (s) */
 
+__IO uint16_t g_step_angle = 15;            /* 设置的步进步数*/
+extern __IO  uint32_t g_add_pulse_count;    /* 脉冲个数累计*/
+extern motor_state_typedef g_motor_sta;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -60,7 +71,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern uint8_t g_run_flag;
+//extern uint8_t g_run_flag;
 /* USER CODE END 0 */
 
 /**
@@ -102,17 +113,19 @@ int main(void)
   Led_Init();
   lcd_init();
   
-  lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
+  // lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
   // lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
 
   KeyPressedID key_id = KEY_None;
   uint8_t t;
   int angle = 0;
   char buf[32];
-  // uint32_t apb2_freq_LCD = HAL_RCC_GetPCLK2Freq();
-  // lcd_show_num(10, 85, apb2_freq_LCD, 10, 24, RED);
-  printf("Hello World!\n");
-  printf("KEY0开启梯形加减速\r\n");
+  g_point_color = WHITE;
+  g_back_color  = BLACK;
+  lcd_show_string(10,10,200,16,16,"Stepper Motor Test",   g_point_color);
+  lcd_show_string(10,30,200,16,16,"KEY0:Run Once",        g_point_color);
+  lcd_show_string(10,50,200,16,16,"KEY1:STEP ++",g_point_color);
+  lcd_show_string(10,70,200,16,16,"KEY2:STEP --",  g_point_color);
   printf("KEY1 add step\r\n");
   printf("KEY2 sub step\r\n");
 
@@ -129,57 +142,87 @@ int main(void)
 // 功能
 
 
-         key_id = Key_Scan();
-        if(key_id == KEY0_Pressed)                                /* 按下KEY0增加旋转角度 */
-        {
-            if(g_run_flag == 0)
-            {
-                angle += 90;
-                if(angle >= 0)
-                {
-                  Stepper_SetDir(STEPPER_1,STEPPER_DIR_CW);
-                }else 
-                {
-                  Stepper_SetDir(STEPPER_1,STEPPER_DIR_CCW);
-                }
-                sprintf(buf, "angle:%d\r\n",angle);            
-                printf(buf);
-                lcd_show_string(10, 85, 300, 32, 32, buf, BLUE);
-            }
-        }
-        else if(key_id == KEY1_Pressed)                           /* 按下KEY1减少旋转角度 */
-        {
-            if(g_run_flag == 0)
-            {
-               angle -= 90;
-                if(angle >= 0)
-                {
-                  Stepper_SetDir(STEPPER_1,STEPPER_DIR_CW);
+        //  key_id = Key_Scan();
+        // if(key_id == KEY0_Pressed)                                /* 按下KEY0增加旋转角度 */
+        // {
+        //     if(g_run_flag == 0)
+        //     {
+        //         angle += 90;
+        //         if(angle >= 0)
+        //         {
+        //           Stepper_SetDir(STEPPER_1,STEPPER_DIR_CW);
+        //         }else 
+        //         {
+        //           Stepper_SetDir(STEPPER_1,STEPPER_DIR_CCW);
+        //         }
+        //         sprintf(buf, "angle:%d\r\n",angle);            
+        //         printf(buf);
+        //         lcd_show_string(10, 85, 300, 32, 32, buf, BLUE);
+        //     }
+        // }
+        // else if(key_id == KEY1_Pressed)                           /* 按下KEY1减少旋转角度 */
+        // {
+        //     if(g_run_flag == 0)
+        //     {
+        //        angle -= 90;
+        //         if(angle >= 0)
+        //         {
+        //           Stepper_SetDir(STEPPER_1,STEPPER_DIR_CW);
                   
-                }else 
-                {
-                  Stepper_SetDir(STEPPER_1,STEPPER_DIR_CCW);
-                }
-                sprintf(buf, "angle:%d\r\n",angle); 
-                printf(buf);
-                lcd_show_string(10, 85, 300, 32, 32, buf, BLUE);
-            }
-        }
-        else if(key_id == KEY2_Pressed)                           /* 按下KEY2开启电机 */
-        {         
-            if(g_run_flag == 0)
-            {
-                stepper_set_angle(STEPPER_1, angle); /* 开启旋转 */
-                angle = 0;                                  /* 角度清0，以便下次设置 */
-                printf("start!\r\n");
-                sprintf(buf, "start!\r\n");
-                lcd_show_string(10, 120, 300, 32, 32, buf, GREEN);
-            }                
-        }
+        //         }else 
+        //         {
+        //           Stepper_SetDir(STEPPER_1,STEPPER_DIR_CCW);
+        //         }
+        //         sprintf(buf, "angle:%d\r\n",angle); 
+        //         printf(buf);
+        //         lcd_show_string(10, 85, 300, 32, 32, buf, BLUE);
+        //     }
+        // }
+        // else if(key_id == KEY2_Pressed)                           /* 按下KEY2开启电机 */
+        // {         
+        //     if(g_run_flag == 0)
+        //     {
+        //         stepper_set_angle(STEPPER_1, angle); /* 开启旋转 */
+        //         angle = 0;                                  /* 角度清0，以便下次设置 */
+        //         printf("start!\r\n");
+        //         sprintf(buf, "start!\r\n");
+        //         lcd_show_string(10, 120, 300, 32, 32, buf, GREEN);
+        //     }                
+        // }
+        // t++;
+        // if(t % 200 == 0)
+        // {
+        //     Led_Toggle(LED1);                                  /* LED0(红灯) 翻转 */        
+        // }
+
         t++;
         if(t % 200 == 0)
-        {
+        {            
+            sprintf(buf,"Set_Aangle:%d ",g_step_angle);                 /*设置的旋转位置（角度）*/
+            lcd_show_string(10,90,200,16,16,buf,g_point_color);
+            sprintf(buf,"Add_Aangle:%.2f ",g_add_pulse_count*0.1125);    /*累计旋转的角度*/
+            lcd_show_string(10,110,200,16,16,buf,g_point_color);
             Led_Toggle(LED1);                                  /* LED0(红灯) 翻转 */        
+    
+        }
+        key_id = Key_Scan();
+        if(key_id == KEY0_Pressed)                                            /* 开启电机S型加减速 */
+        {
+            if(g_motor_sta == STATE_IDLE)
+            {
+                g_add_pulse_count=0;
+                stepmotor_move_rel(V_START,V_END,ACCELTIME,DECEELTIME,g_step_angle*SPR );/* 一次加减速运动 */
+            }
+        }
+        else if(key_id == KEY1_Pressed)                                       /* 步数加 */
+        {
+            g_step_angle=g_step_angle+1;
+            if(g_step_angle>=50)  g_step_angle=1;
+        }
+        else if(key_id == KEY2_Pressed)                                       /* 步数减 */
+        {
+            g_step_angle=g_step_angle-1;
+            if(g_step_angle<=1)  g_step_angle=50;
         }
 
 

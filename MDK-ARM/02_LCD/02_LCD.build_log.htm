@@ -22,12 +22,27 @@ Dialog DLL:      TCM.DLL V1.56.4.0
  
 <h2>Project:</h2>
 D:\Users\Desktop\GenBotter_Motro\basic_folder\03_Firmware\02_LCD\MDK-ARM\02_LCD.uvprojx
-Project File Date:  06/03/2026
+Project File Date:  06/11/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\softinstall\keil\Core\ARM\ARMCC\Bin'
 Build target '02_LCD'
-"02_LCD\02_LCD.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+../Core/Src/main.c(214): warning:  #223-D: function "stepmotor_move_rel" declared implicitly
+                  stepmotor_move_rel(V_START,V_END,ACCELTIME,DECEELTIME,g_step_angle*SPR );/* 一次加减速运�? */
+../Core/Src/main.c(121): warning:  #177-D: variable "angle"  was declared but never referenced
+    int angle = 0;
+../Core/Src/main.c: 2 warnings, 0 errors
+compiling stepper_motor.c...
+..\Mid\BSP\Src\stepper_motor.c(423): warning:  #870-D: invalid multibyte character sequence
+          printf("步数不足，参数设置错�?!\r\n");
+..\Mid\BSP\Src\stepper_motor.c(508): warning:  #1-D: last line of file ends without a newline
+  }
+..\Mid\BSP\Src\stepper_motor.c: 2 warnings, 0 errors
+linking...
+Program Size: Code=29696 RO-data=12920 RW-data=84 ZI-data=186348  
+FromELF: creating hex file...
+"02_LCD\02_LCD.axf" - 0 Error(s), 4 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -51,7 +66,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE:5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:02
 </pre>
 </body>
 </html>

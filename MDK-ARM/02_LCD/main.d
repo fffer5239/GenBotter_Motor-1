@@ -43,3 +43,5 @@
 02_lcd\main.o: ../Mid/BSP/Inc/key_led.h
 02_lcd\main.o: ../Mid/BSP/Inc/stepper_motor.h
 02_lcd\main.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\stdio.h
+02_lcd\main.o: ..\Mid\MALLOC\malloc.h
+02_lcd\main.o: ../Drivers/CMSIS/Include/core_cm4.h
