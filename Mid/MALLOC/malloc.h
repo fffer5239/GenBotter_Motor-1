@@ -33,7 +33,11 @@
 #ifndef NULL
 #define NULL 0
 #endif
-
+//sram1 112K
+//sram2 16K
+//存 SRRAM 的是 Total RW Size（182 KB）
+// ——所有全局变量和静态变量，包括内存池、外设句柄、状态变量等。
+// 而程序代码和 const 常量存在 Flash 里。
 /* 定义三个内存池 */
 #define     SRAMIN                  0                               /* 内部内存池 */
 #define     SRAMCCM                 1                               /* CCM内存池(此部分SRAM仅仅CPU可以访问!!!) */
