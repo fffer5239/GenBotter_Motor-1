@@ -176,7 +176,10 @@ StepperErrorCode Stepper_SetDir(StepperID id, StepperDir dir);
 StepperErrorCode Stepper_SetEnable(StepperID id, StepperEnableState enable);
 StepperErrorCode Stepper_GetStatus(StepperID id, StepperStatus *status);
 
-void stepper_set_angle(StepperID id, uint16_t angle);/* 将角度转换成脉冲个数 */
 
+
+void stepper_set_angle(StepperID id, uint16_t angle);/* 将角度转换成脉冲个数 */
+void stepmotor_move_rel(int32_t vo, int32_t vt, float AcTime,float DeTime,int32_t step);  /* S型加减速运动控制函数 */
+uint8_t calc_speed(int32_t vo, int32_t vt, float time);     /* 计算速度表 */    
 
 #endif /* __STEPPER_MOTOR_H_ */

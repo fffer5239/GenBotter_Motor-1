@@ -37,5 +37,5 @@
 02_lcd\stepper_motor.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\stdio.h
 02_lcd\stepper_motor.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\math.h
 02_lcd\stepper_motor.o: ../Core/Inc/tim.h
-02_lcd\stepper_motor.o: ..\Mid\MALLOC\malloc.h
+02_lcd\stepper_motor.o: ../Mid/MALLOC/malloc.h
 02_lcd\stepper_motor.o: ../Drivers/CMSIS/Include/core_cm4.h

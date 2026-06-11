@@ -28,21 +28,13 @@ Project File Date:  06/11/2026
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\softinstall\keil\Core\ARM\ARMCC\Bin'
 Build target '02_LCD'
 compiling main.c...
-../Core/Src/main.c(214): warning:  #223-D: function "stepmotor_move_rel" declared implicitly
-                  stepmotor_move_rel(V_START,V_END,ACCELTIME,DECEELTIME,g_step_angle*SPR );/* 一次加减速运�? */
 ../Core/Src/main.c(121): warning:  #177-D: variable "angle"  was declared but never referenced
     int angle = 0;
-../Core/Src/main.c: 2 warnings, 0 errors
-compiling stepper_motor.c...
-..\Mid\BSP\Src\stepper_motor.c(423): warning:  #870-D: invalid multibyte character sequence
-          printf("步数不足，参数设置错�?!\r\n");
-..\Mid\BSP\Src\stepper_motor.c(508): warning:  #1-D: last line of file ends without a newline
-  }
-..\Mid\BSP\Src\stepper_motor.c: 2 warnings, 0 errors
+../Core/Src/main.c: 1 warning, 0 errors
 linking...
-Program Size: Code=29696 RO-data=12920 RW-data=84 ZI-data=186348  
+Program Size: Code=29680 RO-data=12920 RW-data=84 ZI-data=186348  
 FromELF: creating hex file...
-"02_LCD\02_LCD.axf" - 0 Error(s), 4 Warning(s).
+"02_LCD\02_LCD.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -66,7 +58,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE:5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

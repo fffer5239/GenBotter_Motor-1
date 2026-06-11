@@ -1812,27 +1812,27 @@ Image Symbol Table
     i.lcd_write_ram_prepare                  0x08007030   Section        0  lcd.o(i.lcd_write_ram_prepare)
     i.lcd_write_reg                          0x08007044   Section        0  lcd.o(i.lcd_write_reg)
     i.main                                   0x08007054   Section        0  main.o(i.main)
-    i.my_mem_free                            0x08007284   Section        0  malloc.o(i.my_mem_free)
-    i.my_mem_init                            0x080072dc   Section        0  malloc.o(i.my_mem_init)
-    i.my_mem_malloc                          0x08007318   Section        0  malloc.o(i.my_mem_malloc)
-    i.my_mem_perused                         0x080073a8   Section        0  malloc.o(i.my_mem_perused)
-    i.myfree                                 0x080073e0   Section        0  malloc.o(i.myfree)
-    i.mymalloc                               0x080073f8   Section        0  malloc.o(i.mymalloc)
-    i.mymemset                               0x08007418   Section        0  malloc.o(i.mymemset)
-    i.sqrt                                   0x08007426   Section        0  sqrt.o(i.sqrt)
-    i.stepmotor_move_rel                     0x08007494   Section        0  stepper_motor.o(i.stepmotor_move_rel)
-    .constdata                               0x08007588   Section       16  system_stm32f4xx.o(.constdata)
-    .constdata                               0x08007598   Section        8  system_stm32f4xx.o(.constdata)
-    .constdata                               0x080075a0   Section    12160  lcd.o(.constdata)
-    .constdata                               0x0800a520   Section      128  stepper_motor.o(.constdata)
-    .constdata                               0x0800a5a0   Section       24  malloc.o(.constdata)
-    .constdata                               0x0800a5b8   Section      136  pow.o(.constdata)
-    bp                                       0x0800a5b8   Data          16  pow.o(.constdata)
-    dp_h                                     0x0800a5c8   Data          16  pow.o(.constdata)
-    dp_l                                     0x0800a5d8   Data          16  pow.o(.constdata)
-    L                                        0x0800a5e8   Data          48  pow.o(.constdata)
-    P                                        0x0800a618   Data          40  pow.o(.constdata)
-    .constdata                               0x0800a640   Section        8  qnan.o(.constdata)
+    i.my_mem_free                            0x08007274   Section        0  malloc.o(i.my_mem_free)
+    i.my_mem_init                            0x080072cc   Section        0  malloc.o(i.my_mem_init)
+    i.my_mem_malloc                          0x08007308   Section        0  malloc.o(i.my_mem_malloc)
+    i.my_mem_perused                         0x08007398   Section        0  malloc.o(i.my_mem_perused)
+    i.myfree                                 0x080073d0   Section        0  malloc.o(i.myfree)
+    i.mymalloc                               0x080073e8   Section        0  malloc.o(i.mymalloc)
+    i.mymemset                               0x08007408   Section        0  malloc.o(i.mymemset)
+    i.sqrt                                   0x08007416   Section        0  sqrt.o(i.sqrt)
+    i.stepmotor_move_rel                     0x08007484   Section        0  stepper_motor.o(i.stepmotor_move_rel)
+    .constdata                               0x08007578   Section       16  system_stm32f4xx.o(.constdata)
+    .constdata                               0x08007588   Section        8  system_stm32f4xx.o(.constdata)
+    .constdata                               0x08007590   Section    12160  lcd.o(.constdata)
+    .constdata                               0x0800a510   Section      128  stepper_motor.o(.constdata)
+    .constdata                               0x0800a590   Section       24  malloc.o(.constdata)
+    .constdata                               0x0800a5a8   Section      136  pow.o(.constdata)
+    bp                                       0x0800a5a8   Data          16  pow.o(.constdata)
+    dp_h                                     0x0800a5b8   Data          16  pow.o(.constdata)
+    dp_l                                     0x0800a5c8   Data          16  pow.o(.constdata)
+    L                                        0x0800a5d8   Data          48  pow.o(.constdata)
+    P                                        0x0800a608   Data          40  pow.o(.constdata)
+    .constdata                               0x0800a630   Section        8  qnan.o(.constdata)
     .ARM.__AT_0x10000000                     0x10000000   Section    61440  malloc.o(.ARM.__AT_0x10000000)
     .ARM.__AT_0x1000F000                     0x1000f000   Section     3840  malloc.o(.ARM.__AT_0x1000F000)
     .bss                                     0x20000000   Section    112640  malloc.o(.bss)
@@ -2100,7 +2100,7 @@ Image Symbol Table
     Led_Toggle                               0x08001d4d   Thumb Code    22  key_led.o(i.Led_Toggle)
     MX_FSMC_Init                             0x08001d69   Thumb Code   132  fsmc.o(i.MX_FSMC_Init)
     MX_GPIO_Init                             0x08001df5   Thumb Code   268  gpio.o(i.MX_GPIO_Init)
-    MX_TIM8_Init                             0x08001f11   Thumb Code   150  tim.o(i.MX_TIM8_Init)
+    MX_TIM8_Init                             0x08001f11   Thumb Code   152  tim.o(i.MX_TIM8_Init)
     MX_USART1_UART_Init                      0x08001fb1   Thumb Code    48  usart.o(i.MX_USART1_UART_Init)
     MemManage_Handler                        0x08001fe9   Thumb Code     2  stm32f4xx_it.o(i.MemManage_Handler)
     NMI_Handler                              0x08001feb   Thumb Code     2  stm32f4xx_it.o(i.NMI_Handler)
@@ -2163,28 +2163,28 @@ Image Symbol Table
     lcd_write_ram_prepare                    0x08007031   Thumb Code    10  lcd.o(i.lcd_write_ram_prepare)
     lcd_write_reg                            0x08007045   Thumb Code    10  lcd.o(i.lcd_write_reg)
     main                                     0x08007055   Thumb Code   380  main.o(i.main)
-    my_mem_free                              0x08007285   Thumb Code    78  malloc.o(i.my_mem_free)
-    my_mem_init                              0x080072dd   Thumb Code    50  malloc.o(i.my_mem_init)
-    my_mem_malloc                            0x08007319   Thumb Code   136  malloc.o(i.my_mem_malloc)
-    my_mem_perused                           0x080073a9   Thumb Code    48  malloc.o(i.my_mem_perused)
-    myfree                                   0x080073e1   Thumb Code    20  malloc.o(i.myfree)
-    mymalloc                                 0x080073f9   Thumb Code    28  malloc.o(i.mymalloc)
-    mymemset                                 0x08007419   Thumb Code    14  malloc.o(i.mymemset)
-    sqrt                                     0x08007427   Thumb Code   110  sqrt.o(i.sqrt)
-    stepmotor_move_rel                       0x08007495   Thumb Code   188  stepper_motor.o(i.stepmotor_move_rel)
-    AHBPrescTable                            0x08007588   Data          16  system_stm32f4xx.o(.constdata)
-    APBPrescTable                            0x08007598   Data           8  system_stm32f4xx.o(.constdata)
-    asc2_1206                                0x080075a0   Data        1140  lcd.o(.constdata)
-    asc2_1608                                0x08007a14   Data        1520  lcd.o(.constdata)
-    asc2_2412                                0x08008004   Data        3420  lcd.o(.constdata)
-    asc2_3216                                0x08008d60   Data        6080  lcd.o(.constdata)
-    stepper_hw_res                           0x0800a520   Data         128  stepper_motor.o(.constdata)
-    memtblsize                               0x0800a5a0   Data           8  malloc.o(.constdata)
-    memblksize                               0x0800a5a8   Data           8  malloc.o(.constdata)
-    memsize                                  0x0800a5b0   Data           8  malloc.o(.constdata)
-    __mathlib_zero                           0x0800a640   Data           8  qnan.o(.constdata)
-    Region$$Table$$Base                      0x0800a648   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x0800a678   Number         0  anon$$obj.o(Region$$Table)
+    my_mem_free                              0x08007275   Thumb Code    78  malloc.o(i.my_mem_free)
+    my_mem_init                              0x080072cd   Thumb Code    50  malloc.o(i.my_mem_init)
+    my_mem_malloc                            0x08007309   Thumb Code   136  malloc.o(i.my_mem_malloc)
+    my_mem_perused                           0x08007399   Thumb Code    48  malloc.o(i.my_mem_perused)
+    myfree                                   0x080073d1   Thumb Code    20  malloc.o(i.myfree)
+    mymalloc                                 0x080073e9   Thumb Code    28  malloc.o(i.mymalloc)
+    mymemset                                 0x08007409   Thumb Code    14  malloc.o(i.mymemset)
+    sqrt                                     0x08007417   Thumb Code   110  sqrt.o(i.sqrt)
+    stepmotor_move_rel                       0x08007485   Thumb Code   188  stepper_motor.o(i.stepmotor_move_rel)
+    AHBPrescTable                            0x08007578   Data          16  system_stm32f4xx.o(.constdata)
+    APBPrescTable                            0x08007588   Data           8  system_stm32f4xx.o(.constdata)
+    asc2_1206                                0x08007590   Data        1140  lcd.o(.constdata)
+    asc2_1608                                0x08007a04   Data        1520  lcd.o(.constdata)
+    asc2_2412                                0x08007ff4   Data        3420  lcd.o(.constdata)
+    asc2_3216                                0x08008d50   Data        6080  lcd.o(.constdata)
+    stepper_hw_res                           0x0800a510   Data         128  stepper_motor.o(.constdata)
+    memtblsize                               0x0800a590   Data           8  malloc.o(.constdata)
+    memblksize                               0x0800a598   Data           8  malloc.o(.constdata)
+    memsize                                  0x0800a5a0   Data           8  malloc.o(.constdata)
+    __mathlib_zero                           0x0800a630   Data           8  qnan.o(.constdata)
+    Region$$Table$$Base                      0x0800a638   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x0800a668   Number         0  anon$$obj.o(Region$$Table)
     mem2base                                 0x10000000   Data       61440  malloc.o(.ARM.__AT_0x10000000)
     mem2mapbase                              0x1000f000   Data        3840  malloc.o(.ARM.__AT_0x1000F000)
     mem1base                                 0x20000000   Data       112640  malloc.o(.bss)
@@ -2217,9 +2217,9 @@ Memory Map of the image
 
   Image Entry point : 0x08000189
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x0000a6cc, Max: 0x00100000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x0000a6bc, Max: 0x00100000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x0000a678, Max: 0x00100000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x0000a668, Max: 0x00100000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -2394,56 +2394,56 @@ Memory Map of the image
     0x08007018   0x08007018   0x00000018   Code   RO         3423    i.lcd_wr_regno      lcd.o
     0x08007030   0x08007030   0x00000014   Code   RO         3424    i.lcd_write_ram_prepare  lcd.o
     0x08007044   0x08007044   0x00000010   Code   RO         3425    i.lcd_write_reg     lcd.o
-    0x08007054   0x08007054   0x00000230   Code   RO           15    i.main              main.o
-    0x08007284   0x08007284   0x00000058   Code   RO         3719    i.my_mem_free       malloc.o
-    0x080072dc   0x080072dc   0x0000003c   Code   RO         3720    i.my_mem_init       malloc.o
-    0x08007318   0x08007318   0x00000090   Code   RO         3721    i.my_mem_malloc     malloc.o
-    0x080073a8   0x080073a8   0x00000038   Code   RO         3722    i.my_mem_perused    malloc.o
-    0x080073e0   0x080073e0   0x00000018   Code   RO         3723    i.myfree            malloc.o
-    0x080073f8   0x080073f8   0x00000020   Code   RO         3724    i.mymalloc          malloc.o
-    0x08007418   0x08007418   0x0000000e   Code   RO         3726    i.mymemset          malloc.o
-    0x08007426   0x08007426   0x0000006e   Code   RO         4122    i.sqrt              m_wm.l(sqrt.o)
-    0x08007494   0x08007494   0x000000f4   Code   RO         3635    i.stepmotor_move_rel  stepper_motor.o
-    0x08007588   0x08007588   0x00000010   Data   RO         3271    .constdata          system_stm32f4xx.o
-    0x08007598   0x08007598   0x00000008   Data   RO         3272    .constdata          system_stm32f4xx.o
-    0x080075a0   0x080075a0   0x00002f80   Data   RO         3428    .constdata          lcd.o
-    0x0800a520   0x0800a520   0x00000080   Data   RO         3639    .constdata          stepper_motor.o
-    0x0800a5a0   0x0800a5a0   0x00000018   Data   RO         3732    .constdata          malloc.o
-    0x0800a5b8   0x0800a5b8   0x00000088   Data   RO         3800    .constdata          m_wm.l(pow.o)
-    0x0800a640   0x0800a640   0x00000008   Data   RO         4119    .constdata          m_wm.l(qnan.o)
-    0x0800a648   0x0800a648   0x00000030   Data   RO         4185    Region$$Table       anon$$obj.o
+    0x08007054   0x08007054   0x00000220   Code   RO           15    i.main              main.o
+    0x08007274   0x08007274   0x00000058   Code   RO         3719    i.my_mem_free       malloc.o
+    0x080072cc   0x080072cc   0x0000003c   Code   RO         3720    i.my_mem_init       malloc.o
+    0x08007308   0x08007308   0x00000090   Code   RO         3721    i.my_mem_malloc     malloc.o
+    0x08007398   0x08007398   0x00000038   Code   RO         3722    i.my_mem_perused    malloc.o
+    0x080073d0   0x080073d0   0x00000018   Code   RO         3723    i.myfree            malloc.o
+    0x080073e8   0x080073e8   0x00000020   Code   RO         3724    i.mymalloc          malloc.o
+    0x08007408   0x08007408   0x0000000e   Code   RO         3726    i.mymemset          malloc.o
+    0x08007416   0x08007416   0x0000006e   Code   RO         4122    i.sqrt              m_wm.l(sqrt.o)
+    0x08007484   0x08007484   0x000000f4   Code   RO         3635    i.stepmotor_move_rel  stepper_motor.o
+    0x08007578   0x08007578   0x00000010   Data   RO         3271    .constdata          system_stm32f4xx.o
+    0x08007588   0x08007588   0x00000008   Data   RO         3272    .constdata          system_stm32f4xx.o
+    0x08007590   0x08007590   0x00002f80   Data   RO         3428    .constdata          lcd.o
+    0x0800a510   0x0800a510   0x00000080   Data   RO         3639    .constdata          stepper_motor.o
+    0x0800a590   0x0800a590   0x00000018   Data   RO         3732    .constdata          malloc.o
+    0x0800a5a8   0x0800a5a8   0x00000088   Data   RO         3800    .constdata          m_wm.l(pow.o)
+    0x0800a630   0x0800a630   0x00000008   Data   RO         4119    .constdata          m_wm.l(qnan.o)
+    0x0800a638   0x0800a638   0x00000030   Data   RO         4185    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x0800a678, Size: 0x0001b800, Max: 0x0001c000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x0800a668, Size: 0x0001b800, Max: 0x0001c000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x20000000        -       0x0001b800   Zero   RW         3730    .bss                malloc.o
 
 
-    Execution Region RW_IRAM2 (Exec base: 0x2001c000, Load base: 0x0800a678, Size: 0x00002140, Max: 0x00004000, ABSOLUTE)
+    Execution Region RW_IRAM2 (Exec base: 0x2001c000, Load base: 0x0800a668, Size: 0x00002140, Max: 0x00004000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x2001c000   0x0800a678   0x00000002   Data   RW           16    .data               main.o
-    0x2001c002   0x0800a67a   0x00000002   PAD
-    0x2001c004   0x0800a67c   0x00000008   Data   RW          223    .data               fsmc.o
-    0x2001c00c   0x0800a684   0x0000000c   Data   RW         1702    .data               stm32f4xx_hal.o
-    0x2001c018   0x0800a690   0x00000004   Data   RW         3273    .data               system_stm32f4xx.o
-    0x2001c01c   0x0800a694   0x00000004   Data   RW         3429    .data               lcd.o
-    0x2001c020   0x0800a698   0x00000004   Data   RW         3430    .data               lcd.o
-    0x2001c024   0x0800a69c   0x0000000c   Data   RW         3640    .data               stepper_motor.o
-    0x2001c030   0x0800a6a8   0x0000001c   Data   RW         3733    .data               malloc.o
-    0x2001c04c   0x0800a6c4   0x00000004   Data   RW         4148    .data               mc_w.l(stdout.o)
-    0x2001c050   0x0800a6c8   0x00000004   Data   RW         4160    .data               mc_w.l(errno.o)
+    0x2001c000   0x0800a668   0x00000002   Data   RW           16    .data               main.o
+    0x2001c002   0x0800a66a   0x00000002   PAD
+    0x2001c004   0x0800a66c   0x00000008   Data   RW          223    .data               fsmc.o
+    0x2001c00c   0x0800a674   0x0000000c   Data   RW         1702    .data               stm32f4xx_hal.o
+    0x2001c018   0x0800a680   0x00000004   Data   RW         3273    .data               system_stm32f4xx.o
+    0x2001c01c   0x0800a684   0x00000004   Data   RW         3429    .data               lcd.o
+    0x2001c020   0x0800a688   0x00000004   Data   RW         3430    .data               lcd.o
+    0x2001c024   0x0800a68c   0x0000000c   Data   RW         3640    .data               stepper_motor.o
+    0x2001c030   0x0800a698   0x0000001c   Data   RW         3733    .data               malloc.o
+    0x2001c04c   0x0800a6b4   0x00000004   Data   RW         4148    .data               mc_w.l(stdout.o)
+    0x2001c050   0x0800a6b8   0x00000004   Data   RW         4160    .data               mc_w.l(errno.o)
     0x2001c054        -       0x00000050   Zero   RW          222    .bss                fsmc.o
     0x2001c0a4        -       0x00000048   Zero   RW          270    .bss                tim.o
     0x2001c0ec        -       0x00000048   Zero   RW          318    .bss                usart.o
     0x2001c134        -       0x0000000e   Zero   RW         3427    .bss                lcd.o
-    0x2001c142   0x0800a6cc   0x00000002   PAD
+    0x2001c142   0x0800a6bc   0x00000002   PAD
     0x2001c144        -       0x00000078   Zero   RW         3638    .bss                stepper_motor.o
     0x2001c1bc        -       0x00001b80   Zero   RW         3731    .bss                malloc.o
-    0x2001dd3c   0x0800a6cc   0x00000004   PAD
+    0x2001dd3c   0x0800a6bc   0x00000004   PAD
     0x2001dd40        -       0x00000400   Zero   RW            1    STACK               startup_stm32f407xx.o
 
 
@@ -2479,7 +2479,7 @@ Image component sizes
        284         16          0          0          0       1199   gpio.o
        224         22          0          0          0       2610   key_led.o
      12268        116      12160          8         14      23779   lcd.o
-       712        188          0          2          0     712957   main.o
+       696        172          0          2          0     712953   main.o
        418         44         24         28     184960       6816   malloc.o
         36          8        392          0       1024        864   startup_stm32f407xx.o
       1548        196        128         12        120       8563   stepper_motor.o
@@ -2495,11 +2495,11 @@ Image component sizes
         32          6          0          0          0       4915   stm32f4xx_it.o
        224         14          0          0          0       4091   stm32f4xx_ll_fsmc.o
         16          4         24          4          0       1211   system_stm32f4xx.o
-       304         34          0          0         72       2534   tim.o
+       304         32          0          0         72       2538   tim.o
        184         24          0          0         72       2474   usart.o
 
     ----------------------------------------------------------------------
-     21648       1052      12776         76     186348     852687   Object Totals
+     21632       1034      12776         76     186348     852687   Object Totals
          0          0         48          0          0          0   (incl. Generated)
         22          0          0          2          6          0   (incl. Padding)
 
@@ -2573,15 +2573,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     29696       1510      12920         84     186348     844211   Grand Totals
-     29696       1510      12920         84     186348     844211   ELF Image Totals
-     29696       1510      12920         84          0          0   ROM Totals
+     29680       1492      12920         84     186348     844211   Grand Totals
+     29680       1492      12920         84     186348     844211   ELF Image Totals
+     29680       1492      12920         84          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                42616 (  41.62kB)
+    Total RO  Size (Code + RO Data)                42600 (  41.60kB)
     Total RW  Size (RW Data + ZI Data)            186432 ( 182.06kB)
-    Total ROM Size (Code + RO Data + RW Data)      42700 (  41.70kB)
+    Total ROM Size (Code + RO Data + RW Data)      42684 (  41.68kB)
 
 ==============================================================================
 

@@ -49,10 +49,10 @@
 /* USER CODE BEGIN PM */
 #define V_END           300                 /* 末速度 */
 #define V_START         0                   /* 初速度 */
-#define ACCELTIME       3.5f                /* 加速时间 (s) */
-#define DECEELTIME      1.5f                /* 减速时间 (s) */
+#define ACCELTIME       2.5f                /* 加速时间 (s) */
+#define DECEELTIME      1.0f                /* 减速时间 (s) */
 
-__IO uint16_t g_step_angle = 15;            /* 设置的步进步数*/
+__IO uint16_t g_step_angle = 15;            /* 设置的步进全数*/
 extern __IO  uint32_t g_add_pulse_count;    /* 脉冲个数累计*/
 extern motor_state_typedef g_motor_sta;
 /* USER CODE END PM */
@@ -139,62 +139,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-// 功能
-
-
-        //  key_id = Key_Scan();
-        // if(key_id == KEY0_Pressed)                                /* 按下KEY0增加旋转角度 */
-        // {
-        //     if(g_run_flag == 0)
-        //     {
-        //         angle += 90;
-        //         if(angle >= 0)
-        //         {
-        //           Stepper_SetDir(STEPPER_1,STEPPER_DIR_CW);
-        //         }else 
-        //         {
-        //           Stepper_SetDir(STEPPER_1,STEPPER_DIR_CCW);
-        //         }
-        //         sprintf(buf, "angle:%d\r\n",angle);            
-        //         printf(buf);
-        //         lcd_show_string(10, 85, 300, 32, 32, buf, BLUE);
-        //     }
-        // }
-        // else if(key_id == KEY1_Pressed)                           /* 按下KEY1减少旋转角度 */
-        // {
-        //     if(g_run_flag == 0)
-        //     {
-        //        angle -= 90;
-        //         if(angle >= 0)
-        //         {
-        //           Stepper_SetDir(STEPPER_1,STEPPER_DIR_CW);
-                  
-        //         }else 
-        //         {
-        //           Stepper_SetDir(STEPPER_1,STEPPER_DIR_CCW);
-        //         }
-        //         sprintf(buf, "angle:%d\r\n",angle); 
-        //         printf(buf);
-        //         lcd_show_string(10, 85, 300, 32, 32, buf, BLUE);
-        //     }
-        // }
-        // else if(key_id == KEY2_Pressed)                           /* 按下KEY2开启电机 */
-        // {         
-        //     if(g_run_flag == 0)
-        //     {
-        //         stepper_set_angle(STEPPER_1, angle); /* 开启旋转 */
-        //         angle = 0;                                  /* 角度清0，以便下次设置 */
-        //         printf("start!\r\n");
-        //         sprintf(buf, "start!\r\n");
-        //         lcd_show_string(10, 120, 300, 32, 32, buf, GREEN);
-        //     }                
-        // }
-        // t++;
-        // if(t % 200 == 0)
-        // {
-        //     Led_Toggle(LED1);                                  /* LED0(红灯) 翻转 */        
-        // }
-
+// 功能按键设角度 → 按 KEY0 触发电机转 → LCD 实时显示角度 → LED 闪烁表示活着。
+// 电机的实际加减速控制在 TIM8 OC 中断里完成，主循环只负责"发起运动"和"显示状态"。
         t++;
         if(t % 200 == 0)
         {            
