@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 #include "fsmc.h"
 
@@ -27,6 +28,7 @@
 #include "lcd.h"
 #include "key_led.h"
 #include "bldc_motor.h"
+#include "stdio.h"
 
 /* USER CODE END Includes */
 
@@ -94,16 +96,20 @@ int main(void)
   MX_FSMC_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   DWT_Init(); // 初始化DWT
 
   Key_Init();
   Led_Init();
   lcd_init();
-  BLDC_Init(&htim1);
-  HAL_TIM_Base_Start_IT(&htim2);
+  HAL_TIM_Base_Start_IT(&htim1);
   lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
   lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
+  printf("Hello World!\n");
+  int16_t pwm_duty_temp = 0;
+  int8_t t;
+  char buf[32];
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,38 +120,61 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    // printf("HallSensor State: 0x%02X\n", hallsensor_get_state(MOTOR_1));
+    // HAL_Delay(100);
+    t++;
+    if(t % 200 == 0)
+    {
+        sprintf(buf,"PWM_Duty:%.1f%%",(float)((g_bldc_motor1.pwm_duty/MAX_PWM_DUTY)*100));/* 显示控制PWM占空比 */
+        lcd_show_string(10,139,200,24,24,buf,g_point_color);
+        Led_Toggle(LED1);                          /* LED1(红灯) 翻转 */
+    }
     key_id = Key_Scan();
-    if(key_id == KEY0_Pressed){
+    if(key_id == KEY0_Pressed){ 
         lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
-        BLDC_SetState(BLDC_STEP, BLDC_CW);
+        pwm_duty_temp += 500;
+        if(pwm_duty_temp >= MAX_PWM_DUTY/2)     /* 限速 */
+            pwm_duty_temp = MAX_PWM_DUTY/2;
+        if(pwm_duty_temp > 0)                   /* 通过判断正负号设置旋转方向 */
+        {
+            g_bldc_motor1.pwm_duty = pwm_duty_temp;
+            g_bldc_motor1.dir = CW;
+        }
+        else
+        {
+            g_bldc_motor1.pwm_duty = -pwm_duty_temp;
+            g_bldc_motor1.dir = CCW;
+        }
+        g_bldc_motor1.run_flag = RUN;           /* 开启运行 */
+        start_motor1();                         /* 开启运行 */
     }
     else if(key_id == KEY1_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
-        BLDC_SetState(BLDC_STEP, BLDC_CCW);
+        pwm_duty_temp -= 500;
+        if(pwm_duty_temp <= -MAX_PWM_DUTY/2)
+            pwm_duty_temp = -MAX_PWM_DUTY/2;
+        if(pwm_duty_temp < 0)                   /* 通过判断正负号设置旋转方向 */
+        {
+            g_bldc_motor1.pwm_duty = -pwm_duty_temp;
+            g_bldc_motor1.dir = CCW;
+        }
+        else
+        {
+            g_bldc_motor1.pwm_duty = pwm_duty_temp;
+            g_bldc_motor1.dir = CW;
+        }                                                  
+        g_bldc_motor1.run_flag = RUN;           /* 开启运行 */
+        start_motor1();            
     }
     else if(key_id == KEY2_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);
-        if(BLDC_GetDir() == BLDC_CW){
-          BLDC_SetState(BLDC_RUN, BLDC_CW);
-        }
-        else{
-          BLDC_SetState(BLDC_RUN, BLDC_CCW);
-        }
+        stop_motor1();                          /* 停机 */
+        g_bldc_motor1.run_flag = STOP;          /* 标记停机 */
+        pwm_duty_temp = 0;                      /* 数据清0 */
+        g_bldc_motor1.pwm_duty = 0;
     }  
 
-    if(BLDC_GetState() == BLDC_RUN){
-      Led_On(LED1);
-    }
-    else{
-      Led_Off(LED1);
-    }
-
-    if(BLDC_GetDir() ==  BLDC_CW){
-      Led_On(LED2);
-    }
-    else{
-      Led_Off(LED2);
-    }
+    
 	}
   /* USER CODE END 3 */
 }
