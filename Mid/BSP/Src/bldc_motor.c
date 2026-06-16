@@ -48,7 +48,7 @@ static void BLDC_AllChannelOff(void)
 }
 
 //-----------------------------------------
-// 内部函数：配置某一步的通道
+// 内部函数：配置某一步的通道 H_PWM - L_PWM 控制方式
 void BLDC_SetStep(uint8_t step)
 {
     if (bldc_htim == NULL || step >= 6)
