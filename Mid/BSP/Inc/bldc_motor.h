@@ -3,6 +3,8 @@
 
 #include "main.h"
 
+#define MOTOR_1                     1
+
 // 电机旋转方向枚举
 typedef enum {
     BLDC_CW = 0, // 顺时针

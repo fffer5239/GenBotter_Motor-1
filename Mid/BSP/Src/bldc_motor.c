@@ -91,7 +91,7 @@ void BLDC_SetStep(uint8_t step)
     }
 }
 
-// 启用电机驱动（拉高使能引脚）
+// 启用电机驱动（拉高使能引脚）  io输出高电平，sd引脚为低电平，半桥芯片工作。
 static void BLDC_Enable(void)
 {
     HAL_GPIO_WritePin(BLDC_ENABLE_PORT, BLDC_ENABLE_PIN, GPIO_PIN_SET);
@@ -206,4 +206,32 @@ void BLDC_TickHandler(void)
         comm_counter = 0; // 重置comm_counter
         break;
     }
+}
+
+
+/**
+ * @brief       获取霍尔传感器引脚状态
+ * @param       motor_id ： 电机接口号
+ * @retval      霍尔传感器引脚状态
+ */
+uint32_t hallsensor_get_state(uint8_t motor_id)
+{
+    __IO static uint32_t state ;
+    state  = 0;
+    if(motor_id == MOTOR_1)
+    {
+        // if(HAL_GPIO_ReadPin(HALL1_TIM_CH1_GPIO,HALL1_TIM_CH1_PIN) != GPIO_PIN_RESET)  /* 霍尔传感器状态获取 */
+        // {
+        //     state |= 0x01U;
+        // }
+        // if(HAL_GPIO_ReadPin(HALL1_TIM_CH2_GPIO,HALL1_TIM_CH2_PIN) != GPIO_PIN_RESET)  /* 霍尔传感器状态获取 */
+        // {
+        //     state |= 0x02U;
+        // }
+        // if(HAL_GPIO_ReadPin(HALL1_TIM_CH3_GPIO,HALL1_TIM_CH3_PIN) != GPIO_PIN_RESET)  /* 霍尔传感器状态获取 */
+        // {
+        //     state |= 0x04U;
+        // }
+    }
+    return state;
 }
