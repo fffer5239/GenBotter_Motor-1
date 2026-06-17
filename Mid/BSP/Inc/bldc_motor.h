@@ -63,7 +63,18 @@ extern _bldc_obj g_bldc_motor1;
 #define RUN                         (1)                 /* 电机运动标志 */
 #define STOP                        (0)                 /* 电机停机标志 */
 
+/****************************************** 一阶RC滤波器 **************************************************/
+#define FirstOrderRC_LPF(Yn_1,Xn,a) Yn_1 = (1-a)*Yn_1 + a*Xn; /* Yn:out;Xn:in;a:系数 */
 
+/****************************************** ADC转换系数 **************************************************/
+#define SPEED_COEFF      (uint32_t)((18000/4)*60)       /* 旋转一圈变化4个信号 */
+
+#define NUM_CLEAR(para,val)     {if(para >= val){para=0;}}
+#define NUM_MAX_LIMIT(para,val) {if(para > val){para=val;}}
+#define NUM_MIN_LIMIT(para,val) {if(para < val){para=val;}}
+
+#define ADC2CURT    (float)(3.3f / 4.096f / 0.12f)      /* ADC采集值 * 3.3/4.096 （mv） = 6 * ( 0.02*I ) */
+#define ADC2VBUS    (float)(3.3f * 25 / 4096)           /* ADC采集值 * 3.3/4096 （V）= POWER/(12K+12K+1K)*1K */
 
 typedef void(*pctr) (void);
 

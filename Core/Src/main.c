@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -28,6 +30,7 @@
 #include "lcd.h"
 #include "key_led.h"
 #include "bldc_motor.h"
+#include "bldc_adc.h"
 #include "stdio.h"
 
 /* USER CODE END Includes */
@@ -44,7 +47,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+extern int16_t adc_amp_un[3];
+extern float  adc_amp_bus;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -93,10 +97,13 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_FSMC_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
+  MX_ADC1_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   DWT_Init(); // 初始化DWT
 
@@ -104,12 +111,16 @@ int main(void)
   Led_Init();
   lcd_init();
   HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_Base_Start_IT(&htim6);  // 启动TIM6中断,ADC采集
+  adc_nch_dma_init();
   lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
   lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
   printf("Hello World!\n");
   int16_t pwm_duty_temp = 0;
   int8_t t;
   char buf[32];
+  float current[3]= {0.0f};
+  float current_lpf[4]= {0.0f};
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -126,7 +137,50 @@ int main(void)
     if(t % 200 == 0)
     {
         sprintf(buf,"PWM_Duty:%.1f%%",(float)((g_bldc_motor1.pwm_duty/MAX_PWM_DUTY)*100));/* 显示控制PWM占空比 */
-        lcd_show_string(10,139,200,24,24,buf,g_point_color);
+        lcd_show_string(10,170,200,16,16,buf,g_point_color);
+        
+        sprintf(buf,"Power:%.3fV ",g_adc_val[0]*ADC2VBUS);
+        lcd_show_string(10,190,200,16,16,buf,g_point_color);
+        // printf("ADC[1]=%d\r\n", g_adc_val[1]);
+        sprintf(buf,"Temp:%.1fC ",get_temp(g_adc_val[1]));
+        lcd_show_string(10,210,200,16,16,buf,g_point_color);           
+        
+
+        current[0] = adc_amp_un[0]* ADC2CURT;               /* 计算出三相电流值，U */
+        current[1] = adc_amp_un[1]* ADC2CURT;               /* 计算出三相电流值，V */
+        current[2] = adc_amp_un[2]* ADC2CURT;               /* 计算出三相电流值，W */
+        
+        /*一阶数字滤波 滤波系数0.1 用于显示*/
+        FirstOrderRC_LPF(current_lpf[0],current[0],0.1f);   /* U相电流 */
+        FirstOrderRC_LPF(current_lpf[1],current[1],0.1f);   /* V相电流 */
+        FirstOrderRC_LPF(current_lpf[2],current[2],0.1f);   /* W相电流 */
+        FirstOrderRC_LPF(current_lpf[3],adc_amp_bus,0.1f);  /* 母线电流 */
+        
+        if(g_bldc_motor1.run_flag == STOP)                  /* 停机的电流显示 */
+        {
+            current_lpf[0] = 0;
+            current_lpf[1] = 0;
+            current_lpf[2] = 0;
+            current_lpf[3] = 0;
+        }
+        /* LCD显示提示信息 */
+        sprintf(buf,"Amp U:%.3fmA ",(float)current_lpf[0]);
+        lcd_show_string(10,230,200,16,16,buf,g_point_color);
+        sprintf(buf,"Amp V:%.3fmA ",(float)current_lpf[1]);
+        lcd_show_string(10,250,200,16,16,buf,g_point_color);
+        sprintf(buf,"Amp W:%.3fmA ",(float)current_lpf[2]);
+        lcd_show_string(10,270,200,16,16,buf,g_point_color);
+        sprintf(buf,"Amp Bus:%.3fmA ",(float)current_lpf[3]);
+        lcd_show_string(10,290,200,16,16,buf,g_point_color);
+        
+        /* 串口打印信息 */
+        // printf("Valtage:%.1fV \r\n", g_adc_val[0]*ADC2VBUS);
+        // printf("Temp:%.1fC \r\n", get_temp(g_adc_val[1]));
+        // printf("U相电流为：%.3fmA\r\n", (current_lpf[0]));
+        // printf("V相电流为：%.3fmA\r\n", (current_lpf[1]));
+        // printf("W相电流为：%.3fmA\r\n", (current_lpf[2]));
+        // printf("母线电流为：%.3fmA\r\n", (current_lpf[3]));
+        // printf("\r\n");
         Led_Toggle(LED1);                          /* LED1(红灯) 翻转 */
     }
     key_id = Key_Scan();
