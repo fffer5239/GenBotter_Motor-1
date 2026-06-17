@@ -8,6 +8,12 @@
 /* 定义电机控制结构体 */
 _bldc_obj g_bldc_motor1 = {STOP,0,0,CCW,0,0,0,0,0,0};   /* 电机结构体初始值 */
 
+const uint8_t hall_table_cw[6] = {6,2,3,1,5,4};         /* 顺时针旋转表 */
+const uint8_t hall_table_ccw[6] = {5,1,3,2,6,4};        /* 逆时针旋转表 */
+
+const uint8_t hall_cw_table[12] = {0x62,0x23,0x31,0x15,0x54,0x46,0x63,0x21,0x35,0x14,0x56,0x42};
+const uint8_t hall_ccw_table[12] = {0x45,0x51,0x13,0x32,0x26,0x64,0x41,0x53,0x12,0x36,0x24,0x65};
+
 /**
  * @brief       BLDC控制函数
  * @param       dir :电机方向, Duty:PWM占空比
@@ -21,7 +27,32 @@ void bldc_ctrl(uint8_t motor_id,int32_t dir,float duty)
         g_bldc_motor1.pwm_duty = duty;      /* 占空比 */
     }
 }
-
+/**
+ * @brief       方向检测函数
+ * @param       obj ： 电机控制句柄
+ * @retval      res ： 旋转方向
+ */
+uint8_t check_hall_dir(_bldc_obj * obj)
+{
+    uint8_t temp,res = HALL_ERROR;
+    if((obj->step_last <= 6)&&(obj->step_sta <= 6))
+    {
+        temp = ((obj->step_last & 0x0F) << 4)|(obj->step_sta & 0x0F);
+        if((temp == hall_ccw_table[0])||(temp == hall_ccw_table[1])||\
+                (temp == hall_ccw_table[2])||(temp == hall_ccw_table[3])||\
+                (temp == hall_ccw_table[4])||(temp == hall_ccw_table[5]))
+        {
+            res  = CCW;
+        }
+        else if((temp == hall_cw_table[0])||(temp == hall_cw_table[1])||\
+                (temp == hall_cw_table[2])||(temp == hall_cw_table[3])||\
+                (temp == hall_cw_table[4])||(temp == hall_cw_table[5]))
+        {
+            res  = CW;
+        }
+    }
+    return res;
+}
 /**
  * @brief       获取霍尔传感器引脚状态
  * @param       motor_id ： 电机接口号
@@ -44,7 +75,10 @@ uint32_t hallsensor_get_state(uint8_t motor_id)
         if(HAL_GPIO_ReadPin(HALL1_TIM_CH3_GPIO,HALL1_TIM_CH3_PIN) != GPIO_PIN_RESET)  /* 霍尔传感器状态获取 */
         {
             state |= 0x04U;
+            g_bldc_motor1.hall_single_sta = 1;                                        /* 单个霍尔状态，计算速度用到 */
         }
+        else
+            g_bldc_motor1.hall_single_sta = 0;
     }
     return state;
 }
@@ -89,6 +123,15 @@ void start_motor1(void)
 }
 
 /*************************** 上下桥臂的导通情况，共6种，也称为6步换向（接口一） ****************************/
+/*霍尔传感器真值表*/
+/* U V W  正转*/
+/* 0 0 1: U相上桥臂导通，V相下桥臂导通 */
+/* 1 0 1: U相上桥臂导通，W相下桥臂导通 */
+/* 1 0 0: V相上桥臂导通，W相下桥臂导通 */
+/* 1 1 0: V相上桥臂导通，U相下桥臂导通 */
+/* 0 1 0: W相上桥臂导通，U相下桥臂导通 */
+/* 0 1 1: W相上桥臂导通，V相下桥臂导通 */
+
 
 /*  六步换向函数指针数组 */
 pctr pfunclist_m1[6] =
@@ -189,6 +232,25 @@ void m1_whvl(void)
     HAL_GPIO_WritePin(M1_LOW_SIDE_W_GPIO_Port,M1_LOW_SIDE_W_Pin,GPIO_PIN_RESET);
 }
 
+/**
+ * @brief       检测输入信号是否发生变化
+ * @param       val :输入信号
+ * @note        测量速度使用，获取输入信号状态翻转情况，计算速度
+ * @retval      0：计算高电平时间，1：计算低电平时间，2：信号未改变
+ */
+uint8_t uemf_edge(uint8_t val)
+{
+    /* 主要是检测val信号从0 - 1 在从 1 - 0的过程，即高电平所持续的过程 */
+    static uint8_t oldval = 0;
+    if(oldval != val)
+    {
+        oldval = val;
+        if(val == 0) return 0;
+        else return 1;
+    }
+    return 2;
+}
+
 /***********************************************定时器中断回调函数***********************************************/
 /**
  * @brief       定时器中断回调
@@ -219,7 +281,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 #ifdef H_PWM_L_ON
         if(g_bldc_motor1.run_flag == RUN)
         {
-            g_bldc_motor1.count_j++;
             if(g_bldc_motor1.dir == CW)     /* 顺时针旋转 */
             {
                 g_bldc_motor1.step_sta = hallsensor_get_state(MOTOR_1);
@@ -237,38 +298,39 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                 stop_motor1();
                 g_bldc_motor1.run_flag = STOP;
             }
-            #if 0  // 霍尔信号检测
-            g_bldc_motor1.hall_sta_edge = uemf_edge(g_bldc_motor1.hall_single_sta); /* 检测单个霍尔信号的变化 */
-            if(g_bldc_motor1.hall_sta_edge == 0)                                    /* 统计单个霍尔信号的高电平时间 */
+            /******************************* 速度计算 *******************************/
+            g_bldc_motor1.count_j++;                /* 计算速度专用计数值 */
+            g_bldc_motor1.hall_sta_edge = uemf_edge(g_bldc_motor1.hall_single_sta);/* 检测单个霍尔信号的变化 */
+            if(g_bldc_motor1.hall_sta_edge == 0)    /* 统计单个霍尔信号的高电平时间，当只有一对级的时候，旋转一圈为一个完整脉冲。一高一低相加即旋转一圈所花的时间*/
             {
-                /* 计算速度 */
+                /*计算速度*/
                 if(g_bldc_motor1.dir == CW)
                     temp_speed = (SPEED_COEFF/g_bldc_motor1.count_j);
                 else
                     temp_speed = -(SPEED_COEFF/g_bldc_motor1.count_j);
-                FirstOrderRC_LPF(g_bldc_motor1.speed, temp_speed, 0.2379);          /* 一阶滤波 */
+                FirstOrderRC_LPF(g_bldc_motor1.speed,temp_speed,0.2379f);   /* 一阶滤波 */
                 g_bldc_motor1.no_single = 0;
                 g_bldc_motor1.count_j = 0;
             }
-            if(g_bldc_motor1.hall_sta_edge == 1)                                    /* 当采集到下降沿时数据清0 */
+            if(g_bldc_motor1.hall_sta_edge == 1)    /* 当采集到下降沿时数据清0 */
             {
                 g_bldc_motor1.no_single = 0;
                 g_bldc_motor1.count_j = 0;
             }
-            if(g_bldc_motor1.hall_sta_edge == 2)
+            if(g_bldc_motor1.hall_sta_edge == 2)    /* 霍尔值一直不变代表未换向 */
             {
-                g_bldc_motor1.no_single++;                                          /* 不换相时间累计 超时则判定速度为0 */
+                g_bldc_motor1.no_single++;          /* 不换相时间累计 超时则判定速度为0 */
                 
                 if(g_bldc_motor1.no_single > 15000)
                 {
                     
                     g_bldc_motor1.no_single = 0;
-                    g_bldc_motor1.speed = 0;                                        /* 超时换向 判定为停止 速度为0 */
+                    g_bldc_motor1.speed = 0;        /* 超时换向 判定为停止 速度为0 */
                 }
             }
+            /******************************* 位置记录 *******************************/
             if(g_bldc_motor1.step_last != g_bldc_motor1.step_sta)
             {
-                g_bldc_motor1.hall_keep_t = 0;
                 bldc_dir = check_hall_dir(&g_bldc_motor1);
                 if(bldc_dir == CCW)
                 {
@@ -280,13 +342,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                 }
                 g_bldc_motor1.step_last = g_bldc_motor1.step_sta;
             }
-            else if(g_bldc_motor1.run_flag == RUN)                                      /* 运行且霍尔保持时 */
-            {
-                g_bldc_motor1.hall_keep_t++;                                            /* 换向一次所需计数值（时间） 单位1/18k */
-            }     
-            #endif  
-            /* 三相电流采集 */
-            for(i = 0; i < 3; i++)
+            /******************************* PID控制 *******************************/
+//                temp_pwm1 = increment_pid_ctrl(&g_speed_pid,g_bldc_motor1.speed);   /* PID控制算法，输出期望值 */
+//                FirstOrderRC_LPF(motor_pwm_s,temp_pwm1,0.085);                      /* 一阶滤波 */
+//                if(motor_pwm_s < 0)                                                 /* 判断正负值 */
+//                {
+//                    g_bldc_motor1.pwm_duty = -motor_pwm_s;
+//                }
+//                else
+//                {
+//                   g_bldc_motor1.pwm_duty = motor_pwm_s;
+//                }
+            /******************************* 三相电流计算 *******************************/
+             for(i = 0; i < 3; i++)
             {
                 adc_val_m1[i] = g_adc_val[i+2];
                 adc_amp[i] = adc_val_m1[i] - adc_amp_offset[i][ADC_AMP_OFFSET_TIMES];   /* 运动状态ADC值 - 停机状态ADC值 = 实际作用ADC值 */

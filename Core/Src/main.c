@@ -137,13 +137,13 @@ int main(void)
     if(t % 200 == 0)
     {
         sprintf(buf,"PWM_Duty:%.1f%%",(float)((g_bldc_motor1.pwm_duty/MAX_PWM_DUTY)*100));/* 显示控制PWM占空比 */
-        lcd_show_string(10,170,200,16,16,buf,g_point_color);
+        lcd_show_string(10,150,200,16,16,buf,g_point_color);
         
         sprintf(buf,"Power:%.3fV ",g_adc_val[0]*ADC2VBUS);
-        lcd_show_string(10,190,200,16,16,buf,g_point_color);
+        lcd_show_string(10,170,200,16,16,buf,g_point_color);
         // printf("ADC[1]=%d\r\n", g_adc_val[1]);
         sprintf(buf,"Temp:%.1fC ",get_temp(g_adc_val[1]));
-        lcd_show_string(10,210,200,16,16,buf,g_point_color);           
+        lcd_show_string(10,190,200,16,16,buf,g_point_color);           
         
 
         current[0] = adc_amp_un[0]* ADC2CURT;               /* 计算出三相电流值，U */
@@ -165,12 +165,14 @@ int main(void)
         }
         /* LCD显示提示信息 */
         sprintf(buf,"Amp U:%.3fmA ",(float)current_lpf[0]);
-        lcd_show_string(10,230,200,16,16,buf,g_point_color);
+        lcd_show_string(10,210,200,16,16,buf,g_point_color);
         sprintf(buf,"Amp V:%.3fmA ",(float)current_lpf[1]);
-        lcd_show_string(10,250,200,16,16,buf,g_point_color);
+        lcd_show_string(10,230,200,16,16,buf,g_point_color);
         sprintf(buf,"Amp W:%.3fmA ",(float)current_lpf[2]);
-        lcd_show_string(10,270,200,16,16,buf,g_point_color);
+        lcd_show_string(10,250,200,16,16,buf,g_point_color);
         sprintf(buf,"Amp Bus:%.3fmA ",(float)current_lpf[3]);
+        lcd_show_string(10,270,200,16,16,buf,g_point_color);
+        sprintf(buf,"Speed:%.1frpm ",(float)g_bldc_motor1.speed);
         lcd_show_string(10,290,200,16,16,buf,g_point_color);
         
         /* 串口打印信息 */
