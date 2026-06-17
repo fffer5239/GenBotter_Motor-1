@@ -1262,6 +1262,11 @@
               <FileType>1</FileType>
               <FilePath>..\Mid\BSP\Src\bldc_adc.c</FilePath>
             </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Mid\BSP\Src\pid.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

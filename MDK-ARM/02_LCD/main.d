@@ -49,3 +49,4 @@
 02_lcd\main.o: ../Mid/BSP/Inc/bldc_motor.h
 02_lcd\main.o: ../Mid/BSP/Inc/bldc_adc.h
 02_lcd\main.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\stdio.h
+02_lcd\main.o: ../Mid/BSP/Inc/pid.h

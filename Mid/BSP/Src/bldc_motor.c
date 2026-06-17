@@ -4,6 +4,8 @@
 #include "gpio.h"
 
 #include "bldc_adc.h"
+#include "pid.h"
+
 
 /* 定义电机控制结构体 */
 _bldc_obj g_bldc_motor1 = {STOP,0,0,CCW,0,0,0,0,0,0};   /* 电机结构体初始值 */
@@ -343,16 +345,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                 g_bldc_motor1.step_last = g_bldc_motor1.step_sta;
             }
             /******************************* PID控制 *******************************/
-//                temp_pwm1 = increment_pid_ctrl(&g_speed_pid,g_bldc_motor1.speed);   /* PID控制算法，输出期望值 */
-//                FirstOrderRC_LPF(motor_pwm_s,temp_pwm1,0.085);                      /* 一阶滤波 */
-//                if(motor_pwm_s < 0)                                                 /* 判断正负值 */
-//                {
-//                    g_bldc_motor1.pwm_duty = -motor_pwm_s;
-//                }
-//                else
-//                {
-//                   g_bldc_motor1.pwm_duty = motor_pwm_s;
-//                }
+            temp_pwm1 = increment_pid_ctrl(&g_speed_pid,g_bldc_motor1.speed);   /* PID控制算法，输出期望值 */
+            FirstOrderRC_LPF(motor_pwm_s,temp_pwm1,0.085);                      /* 一阶滤波 */
+            if(motor_pwm_s < 0)                                                 /* 判断正负值 */
+            {
+                g_bldc_motor1.pwm_duty = -motor_pwm_s;
+            }
+            else
+            {
+                g_bldc_motor1.pwm_duty = motor_pwm_s;
+            }
             /******************************* 三相电流计算 *******************************/
              for(i = 0; i < 3; i++)
             {

@@ -32,6 +32,7 @@
 #include "bldc_motor.h"
 #include "bldc_adc.h"
 #include "stdio.h"
+#include "pid.h"  
 
 /* USER CODE END Includes */
 
@@ -47,8 +48,13 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+extern int32_t motor_pwm_s;
+extern int32_t temp_pwm1;
 extern int16_t adc_amp_un[3];
 extern float  adc_amp_bus;
+
+float*user_setpoint = (float*)(&g_speed_pid.SetPoint);    /* 设置目标值指针 指向存放目标值地址 */
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -136,9 +142,10 @@ int main(void)
     t++;
     if(t % 200 == 0)
     {
-        sprintf(buf,"PWM_Duty:%.1f%%",(float)((g_bldc_motor1.pwm_duty/MAX_PWM_DUTY)*100));/* 显示控制PWM占空比 */
+        // sprintf(buf,"PWM_Duty:%.1f%%",(float)((g_bldc_motor1.pwm_duty/MAX_PWM_DUTY)*100));/* 显示控制PWM占空比 */
+        // lcd_show_string(10,150,200,16,16,buf,g_point_color);
+        sprintf(buf,"g_speed_pid.SetPoint:%.1f",(float)g_speed_pid.SetPoint);
         lcd_show_string(10,150,200,16,16,buf,g_point_color);
-        
         sprintf(buf,"Power:%.3fV ",g_adc_val[0]*ADC2VBUS);
         lcd_show_string(10,170,200,16,16,buf,g_point_color);
         // printf("ADC[1]=%d\r\n", g_adc_val[1]);
@@ -186,41 +193,50 @@ int main(void)
         Led_Toggle(LED1);                          /* LED1(红灯) 翻转 */
     }
     key_id = Key_Scan();
-    if(key_id == KEY0_Pressed){ 
-        lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);
-        pwm_duty_temp += 500;
-        if(pwm_duty_temp >= MAX_PWM_DUTY/2)     /* 限速 */
-            pwm_duty_temp = MAX_PWM_DUTY/2;
-        if(pwm_duty_temp > 0)                   /* 通过判断正负号设置旋转方向 */
-        {
-            g_bldc_motor1.pwm_duty = pwm_duty_temp;
-            g_bldc_motor1.dir = CW;
-        }
-        else
-        {
-            g_bldc_motor1.pwm_duty = -pwm_duty_temp;
-            g_bldc_motor1.dir = CCW;
-        }
-        g_bldc_motor1.run_flag = RUN;           /* 开启运行 */
-        start_motor1();                         /* 开启运行 */
+    if(key_id == KEY0_Pressed)
+    { 
+            lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);  
+            g_bldc_motor1.run_flag = RUN;   /* 开启运行 */
+            start_motor1();                 /* 开启运行 */
+            if(*user_setpoint == 0 && g_bldc_motor1.dir == CCW)
+            {
+                pid_init();                 /* 换向时刻，重新初始化PID，防止速度突变 */
+                g_bldc_motor1.dir = CW;
+            }
+
+            *user_setpoint += 400;          /* 顺时针旋转下递增 */
+            if(*user_setpoint >= 4000)
+                *user_setpoint = 4000;
+            if(*user_setpoint == 0)
+            {
+                g_bldc_motor1.run_flag = STOP; 
+                stop_motor1();              /* 停机 */
+                g_bldc_motor1.speed = 0;
+                motor_pwm_s = 0;
+                g_bldc_motor1.pwm_duty = 0;
+            }
     }
-    else if(key_id == KEY1_Pressed){
-        lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
-        pwm_duty_temp -= 500;
-        if(pwm_duty_temp <= -MAX_PWM_DUTY/2)
-            pwm_duty_temp = -MAX_PWM_DUTY/2;
-        if(pwm_duty_temp < 0)                   /* 通过判断正负号设置旋转方向 */
-        {
-            g_bldc_motor1.pwm_duty = -pwm_duty_temp;
-            g_bldc_motor1.dir = CCW;
-        }
-        else
-        {
-            g_bldc_motor1.pwm_duty = pwm_duty_temp;
-            g_bldc_motor1.dir = CW;
-        }                                                  
-        g_bldc_motor1.run_flag = RUN;           /* 开启运行 */
-        start_motor1();            
+    else if(key_id == KEY1_Pressed)
+    {
+            lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
+            g_bldc_motor1.run_flag = RUN;   /* 开启运行 */
+            start_motor1();                 /* 开启运行 */
+            if(*user_setpoint == 0 && g_bldc_motor1.dir == CW)
+            {     
+                pid_init();
+                g_bldc_motor1.dir = CCW;
+            }
+            *user_setpoint -= 400;          /* 逆时针旋转下递增 */
+            if(*user_setpoint <= -4000)
+                *user_setpoint = -4000;
+            if(*user_setpoint == 0)
+            {
+                g_bldc_motor1.run_flag = STOP;  
+                stop_motor1();              /* 停机 */
+                g_bldc_motor1.speed = 0;
+                motor_pwm_s = 0;
+                g_bldc_motor1.pwm_duty = 0;
+            }      
     }
     else if(key_id == KEY2_Pressed){
         lcd_show_string(10, 115, 200, 24, 24, "key 2 pressed.", BLUE);

@@ -40,3 +40,4 @@
 02_lcd\bldc_motor.o: ../Core/Inc/tim.h
 02_lcd\bldc_motor.o: ../Core/Inc/gpio.h
 02_lcd\bldc_motor.o: ../Mid/BSP/Inc/bldc_adc.h
+02_lcd\bldc_motor.o: ../Mid/BSP/Inc/pid.h
