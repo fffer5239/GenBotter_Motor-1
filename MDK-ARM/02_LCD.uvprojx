@@ -1267,6 +1267,11 @@
               <FileType>1</FileType>
               <FilePath>..\Mid\BSP\Src\pid.c</FilePath>
             </File>
+            <File>
+              <FileName>vofa_plus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Mid\BSP\Src\vofa_plus.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

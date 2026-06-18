@@ -33,6 +33,7 @@
 #include "bldc_adc.h"
 #include "stdio.h"
 #include "pid.h"  
+#include "vofa_plus.h"
 
 /* USER CODE END Includes */
 
@@ -128,6 +129,7 @@ int main(void)
   char buf[32];
   float current[3]= {0.0f};
   float current_lpf[4]= {0.0f};
+  uint32_t vofa_plus_send_time = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -140,6 +142,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     // printf("HallSensor State: 0x%02X\n", hallsensor_get_state(MOTOR_1));
     // HAL_Delay(100);
+    #if 0    
     t++;
     if(t % 200 == 0)
     {
@@ -191,6 +194,14 @@ int main(void)
         // printf("母线电流为：%.3fmA\r\n", (current_lpf[3]));
         // printf("\r\n");
         Led_Toggle(LED1);                          /* LED1(红灯) 翻转 */
+        VOFA_Plus_SendSpeedLoopData(); // 发送当前速度环PID数据到VOFA+
+    }
+    #endif
+
+    if(HAL_GetTick() - vofa_plus_send_time >= 100)
+    {
+      vofa_plus_send_time = HAL_GetTick();
+      VOFA_Plus_SendSpeedLoopData(); // 发送当前速度环PID数据到VOFA+
     }
 
     key_id = Key_Scan();

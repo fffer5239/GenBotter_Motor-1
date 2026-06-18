@@ -1,23 +1,23 @@
 /**
  ****************************************************************************************************
  * @file        pid.h
- * @author      ÕıµãÔ­×ÓÍÅ¶Ó(ALIENTEK)
+ * @author      æ­£ç‚¹åŸå­å›¢é˜Ÿ(ALIENTEK)
  * @version     V1.0
  * @date        2021-10-14
- * @brief       PID´úÂë
- * @license     Copyright (c) 2020-2032, ¹ãÖİÊĞĞÇÒíµç×Ó¿Æ¼¼ÓĞÏŞ¹«Ë¾
+ * @brief       PIDç®—æ³•å¤´æ–‡ä»¶
+ * @license     Copyright (c) 2020-2032, å¹¿å·å¸‚æ˜Ÿç¿¼ç”µå­ç§‘æŠ€æœ‰é™å…¬å¸
  ****************************************************************************************************
  * @attention
  *
- * ÊµÑéÆ½Ì¨:ÕıµãÔ­×Ó STM32F407µç»ú¿ª·¢°å
- * ÔÚÏßÊÓÆµ:www.yuanzige.com
- * ¼¼ÊõÂÛÌ³:www.openedv.com
- * ¹«Ë¾ÍøÖ·:www.alientek.com
- * ¹ºÂòµØÖ·:openedv.taobao.com
+ * å®éªŒå¹³å°:æ­£ç‚¹åŸå­ STM32F407å¼€å‘æ¿
+ * è®ºå›    :www.yuanzige.com
+ * å®˜æ–¹è®ºå›:www.openedv.com
+ * å…¬å¸åœ°å€:www.alientek.com
+ * æ·˜å®åœ°å€:openedv.taobao.com
  *
- * ĞŞ¸ÄËµÃ÷
+ * ä¿®æ”¹è¯´æ˜
  * V1.0 20211014
- * µÚÒ»´Î·¢²¼
+ * é¦–æ¬¡å‘å¸ƒ
  *
  ****************************************************************************************************
  */
@@ -27,46 +27,56 @@
 #include "main.h"
 
 /******************************************************************************************/
-/* PIDÏà¹Ø²ÎÊı */
+/* PIDå‚æ•°å®šä¹‰ */
 
-#define  INCR_LOCT_SELECT  0/*µ±Îª 0 µÄÊ±ºòÑ¡ÓÃÎ»ÖÃÊ½ PID Ëã·¨£»Îª 1 Ê±£¬Ñ¡ÓÃÔöÁ¿Ê½ PID Ëã·¨*/
+#define  INCR_LOCT_SELECT  0    /* 0: é€‰æ‹©ä½ç½®å¼PIDç®—æ³•, 1: é€‰æ‹©å¢é‡å¼PIDç®—æ³• */
+
 #if INCR_LOCT_SELECT
-/*¶¨ÒåPID²ÎÊıÏà¹Øºê*/
-#define  KP      0.00800f      /* P²ÎÊı*/
-#define  KI      0.00025f       /* I²ÎÊı*/
-#define  KD      0.00020f    /* D²ÎÊı*/
-#define SMAPLSE_PID_SPEED  50        /*²ÉÑùÂÊ µ¥Î»ms*/
+/* å¢é‡å¼PIDå‚æ•°å® */
+#define  KP      0.00800f       /* æ¯”ä¾‹ç³»æ•° P */
+#define  KI      0.00025f       /* ç§¯åˆ†ç³»æ•° I */
+#define  KD      0.00020f       /* å¾®åˆ†ç³»æ•° D */
+#define SMAPLSE_PID_SPEED  50   /* é‡‡æ ·å‘¨æœŸ, å•ä½ms */
 #else
-/*¶¨ÒåPID²ÎÊıÏà¹Øºê*/
-#define  KP      1.500f     /* P²ÎÊı*/
-#define  KI      0.00025f        /* I²ÎÊı*/
-#define  KD      0.00020f        /* D²ÎÊı*/
-#define SMAPLSE_PID_SPEED  40        /*²ÉÑùÂÊ µ¥Î»ms*/
+/* ä½ç½®å¼PIDå‚æ•°å® */
+#define  KP      1.600f         /* æ¯”ä¾‹ç³»æ•° P */
+#define  KI      0.00025f       /* ç§¯åˆ†ç³»æ•° I */
+#define  KD      0.00020f       /* å¾®åˆ†ç³»æ•° D */
+#define SMAPLSE_PID_SPEED  40   /* é‡‡æ ·å‘¨æœŸ, å•ä½ms */
 #endif
 
-/*¶¨ÒåÎ»ÖÃPID²ÎÊıÏà¹Øºê*/
-/*PID½á¹¹Ìå*/
+/******************************************************************************************/
+/* PIDç»“æ„ä½“å®šä¹‰ */
+
 typedef struct
 {
-    __IO float  SetPoint;    /*Éè¶¨Ä¿±ê */
-    __IO float  ActualValue; /*Êµ¼ÊÖµ*/
-    __IO float  SumError;    /*Îó²îÀÛ¼Æ*/
-    __IO float  Proportion;  /*±ÈÀı³£Êı P*/
-    __IO float  Integral;    /*»ı·Ö³£Êı I*/
-    __IO float  Derivative;  /*Î¢·Ö³£Êı D*/
-    __IO float  Error;       /*Error[-1]*/
-    __IO float  LastError;   /*Error[-1]*/
-    __IO float  PrevError;   /*Error[-2]*/
-    __IO float  IngMin;
-    __IO float  IngMax;
-    __IO float  OutMin;
-    __IO float  OutMax;
+    __IO float  SetPoint;       /* è®¾å®šç›®æ ‡å€¼ */
+    __IO float  ActualSpeed;   /* å®é™…å€¼ï¼ˆä½ç½®æˆ–é€Ÿåº¦ï¼‰ */
+    __IO float  ActualValue;    /* PIDè¾“å‡ºå€¼ */
+    __IO float  FeedbackValue;  /* å®é™…åé¦ˆå€¼ */
+    __IO float  SumError;       /* è¯¯å·®ç´¯è®¡å€¼ */
+    __IO float  Proportion;     /* æ¯”ä¾‹ç³»æ•° P */
+    __IO float  Integral;       /* ç§¯åˆ†ç³»æ•° I */
+    __IO float  Derivative;     /* å¾®åˆ†ç³»æ•° D */
+    __IO float  Error;          /* å½“å‰è¯¯å·® Error[k] */
+    __IO float  LastError;      /* ä¸Šæ¬¡è¯¯å·® Error[k-1] */
+    __IO float  PrevError;      /* ä¸Šä¸Šæ¬¡è¯¯å·® Error[k-2] */
+    __IO float  IngMin;         /* ç§¯åˆ†é™å¹…æœ€å°å€¼ */
+    __IO float  IngMax;         /* ç§¯åˆ†é™å¹…æœ€å¤§å€¼ */
+    __IO float  OutMin;         /* è¾“å‡ºé™å¹…æœ€å°å€¼ */
+    __IO float  OutMax;         /* è¾“å‡ºé™å¹…æœ€å¤§å€¼ */
 } PID_TypeDef;
 
-extern PID_TypeDef  g_location_pid;       /*Î»ÖÃPID²ÎÊı½á¹¹Ìå*/
-extern PID_TypeDef  g_speed_pid;       /*Î»ÖÃPID²ÎÊı½á¹¹Ìå*/
 /******************************************************************************************/
-/* Íâ²¿½Ó¿Úº¯Êı*/
-void pid_init(void);
-int32_t increment_pid_ctrl(PID_TypeDef *PID,float Feedback_value);
-#endif
+/* å¤–éƒ¨å˜é‡å£°æ˜ */
+
+extern PID_TypeDef  g_location_pid;     /* ä½ç½®PIDæ§åˆ¶ç»“æ„ä½“ */
+extern PID_TypeDef  g_speed_pid;        /* é€Ÿåº¦PIDæ§åˆ¶ç»“æ„ä½“ */
+
+/******************************************************************************************/
+/* å¤–éƒ¨æ¥å£å‡½æ•° */
+
+void pid_init(void);                                            /* PIDå‚æ•°åˆå§‹åŒ– */
+int32_t increment_pid_ctrl(PID_TypeDef *PID, float Feedback_value);  /* PIDè®¡ç®—å‡½æ•° */
+
+#endif /* __PID_H */
