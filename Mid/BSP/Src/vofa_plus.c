@@ -76,32 +76,15 @@ void VOFA_Plus_SendData(VOFA_Data_t *data) {
     if(data == NULL) {
         return;
     }
-
-    #if 0
-    // DMA模式：必须等上一次传输完成，否则HAL_UART_Transmit_DMA返回HAL_BUSY
-    if(VOFA_UART_HANDLE.gState != HAL_UART_STATE_READY) {
-        // 调试：如果卡在这里，说明DMA中断没触发，回调链断了
-        static uint32_t skip_cnt = 0;
-        if(++skip_cnt > 50) {
-            // 连续50次忙，强制中止，恢复UART状态
-            HAL_UART_AbortTransmit(&VOFA_UART_HANDLE);
-            skip_cnt = 0;
-        }
-        return;
-    }
-    #endif
-
     // 封装数据
     uint16_t data_len = VOFA_Plus_PackData(data, vofa_send_buf, VOFA_SEND_BUF_MAX_LEN);
     if(data_len == 0) {
         return;
     }
-
     #if VOFA_UART_DMA_ENABLE
     HAL_StatusTypeDef ret = HAL_UART_Transmit_DMA(&VOFA_UART_HANDLE, vofa_send_buf, data_len);
     if(ret != HAL_OK) {
         // 发送失败，可通过ret值排查：HAL_BUSY=串口忙, HAL_ERROR=参数错误
-        Led_Toggle(LED2);
     }
     #else
     HAL_UART_Transmit(&VOFA_UART_HANDLE, vofa_send_buf, data_len, 10);
@@ -125,5 +108,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
         // Led_Toggle(LED2);  // 用LED2区分主循环的LED1
     }
 }
+
+
 #endif
+
 #endif
+

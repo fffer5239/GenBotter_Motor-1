@@ -34,6 +34,7 @@
 #include "stdio.h"
 #include "pid.h"  
 #include "vofa_plus.h"
+#include "pid_param_parse.h"
 
 /* USER CODE END Includes */
 
@@ -121,6 +122,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim6);  // 启动TIM6中断,ADC采集
   adc_nch_dma_init();
   pid_init();
+  PID_ParamParser_Init();
   lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
   lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
   printf("Hello World!\n");
@@ -130,6 +132,7 @@ int main(void)
   float current[3]= {0.0f};
   float current_lpf[4]= {0.0f};
   uint32_t vofa_plus_send_time = 0;
+  uint32_t pid_param_lcd_flash = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -200,6 +203,14 @@ int main(void)
 
     if(HAL_GetTick() - vofa_plus_send_time >= 100)
     {
+      pid_param_lcd_flash ++;
+      if(pid_param_lcd_flash >= 10)
+      {
+        pid_param_lcd_flash = 0;
+        sprintf(buf,"KP:%.5f,KI:%.5f,KD:%.5f",
+          (float)g_speed_pid.Proportion,(float)g_speed_pid.Integral,(float)g_speed_pid.Derivative);
+        lcd_show_string(10, 150, 400, 16,16,buf,g_point_color);
+      }
       vofa_plus_send_time = HAL_GetTick();
       VOFA_Plus_SendSpeedLoopData(); // 发送当前速度环PID数据到VOFA+
     }

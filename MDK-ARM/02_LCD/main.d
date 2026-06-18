@@ -52,3 +52,4 @@
 02_lcd\main.o: ../Mid/BSP/Inc/pid.h
 02_lcd\main.o: ../Mid/BSP/Inc/vofa_plus.h
 02_lcd\main.o: D:\softinstall\keil\Core\ARM\ARMCC\Bin\..\include\string.h
+02_lcd\main.o: ../Mid/BSP/Inc/pid_param_parse.h
