@@ -271,23 +271,22 @@ int16_t adc_amp_un[3];
 float  adc_amp_bus = 0.0f;
 
 volatile uint16_t adc_val_m1[ADC_CH_NUM];           /* ADC数据缓冲区 */
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    uint8_t bldc_dir=0;
     uint8_t i;
+    uint8_t bldc_dir=0;
     static uint8_t times_count=0;           /* 定时器时间记录 */
     int16_t temp_speed=0;                   /* 临时速度存储 */
     if(htim->Instance == TIM1)     /* 55us */
     {
-#ifdef H_PWM_L_ON
+        /******************************* 六步换向 *******************************/
         if(g_bldc_motor1.run_flag == RUN)
         {
-            if(g_bldc_motor1.dir == CW)     /* 顺时针旋转 */
+            if(g_bldc_motor1.dir == CW)
             {
                 g_bldc_motor1.step_sta = hallsensor_get_state(MOTOR_1);
             }
-            else                            /* 逆时针旋转 */
+            else
             {
                 g_bldc_motor1.step_sta = 7 - hallsensor_get_state(MOTOR_1);
             }
@@ -295,11 +294,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             {
                 pfunclist_m1[g_bldc_motor1.step_sta-1]();
             }
-            else                            /* 编码器错误、接触不良、断开等情况 */
+            else    /* 编码器错误、接触不良、断开等情况 */
             {
                 stop_motor1();
                 g_bldc_motor1.run_flag = STOP;
             }
+            
             /******************************* 速度计算 *******************************/
             g_bldc_motor1.count_j++;                /* 计算速度专用计数值 */
             g_bldc_motor1.hall_sta_edge = uemf_edge(g_bldc_motor1.hall_single_sta);/* 检测单个霍尔信号的变化 */
@@ -345,72 +345,73 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
                 g_bldc_motor1.step_last = g_bldc_motor1.step_sta;
             }
             /******************************* PID控制 *******************************/
-            temp_pwm1 = increment_pid_ctrl(&g_speed_pid,g_bldc_motor1.speed);   /* PID控制算法，输出期望值 */
-            FirstOrderRC_LPF(motor_pwm_s,temp_pwm1,0.085);                      /* 一阶滤波 */
-            if(motor_pwm_s < 0)                                                 /* 判断正负值 */
-            {
-                g_bldc_motor1.pwm_duty = -motor_pwm_s;
-            }
-            else
-            {
-                g_bldc_motor1.pwm_duty = motor_pwm_s;
-            }
+                temp_pwm1 = increment_pid_ctrl(&g_speed_pid,g_bldc_motor1.speed);   /* PID控制算法，输出期望值 */
+                FirstOrderRC_LPF(motor_pwm_s,temp_pwm1,0.085);                      /* 一阶滤波 */
+                if(motor_pwm_s < 0)                                                 /* 判断正负值 */
+                {
+                    g_bldc_motor1.pwm_duty = -motor_pwm_s;
+                }
+                else
+                {
+                   g_bldc_motor1.pwm_duty = motor_pwm_s;
+                }
             /******************************* 三相电流计算 *******************************/
-             for(i = 0; i < 3; i++)
+            for(i=0; i<3; i++)
             {
                 adc_val_m1[i] = g_adc_val[i+2];
-                adc_amp[i] = adc_val_m1[i] - adc_amp_offset[i][ADC_AMP_OFFSET_TIMES];   /* 运动状态ADC值 - 停机状态ADC值 = 实际作用ADC值 */
-                if(adc_amp[i] >= 0)                                                     /* 去除反电动势引起的负电流数据 */
-                    adc_amp_un[i] = adc_amp[i];
+                adc_amp[i] = adc_val_m1[i] - adc_amp_offset[i][ADC_AMP_OFFSET_TIMES];  /* 运动状态ADC值 - 停机状态ADC值 = 实际作用ADC值 */
+                
+                if(adc_amp[i]>=0)                                                      /* 去除反电动势引起的负电流数据 */
+                 adc_amp_un[i] = adc_amp[i];
             }
-            /* 运算母线电流（母线电流为任意两个有开关动作的相电流之和） */
+            /* 运算母线电流（母线电流为任意两个有开关动作的相电流之和）*/
             if(g_bldc_motor1.step_sta == 0x05)
             {
-                adc_amp_bus= (adc_amp_un[0] + adc_amp_un[1])*ADC2CURT;   /* UV */
+                adc_amp_bus= (adc_amp_un[0]+ adc_amp_un[1])*ADC2CURT;/* UV */
             }
-            else if(g_bldc_motor1.step_sta == 0x01)
+            else if(g_bldc_motor1.step_sta== 0x01)
             {
-                adc_amp_bus= (adc_amp_un[0] + adc_amp_un[2])*ADC2CURT;   /* UW */
+                adc_amp_bus= (adc_amp_un[0]+ adc_amp_un[2])*ADC2CURT;/* UW */
             }
-            else if(g_bldc_motor1.step_sta == 0x03)
+            else if(g_bldc_motor1.step_sta== 0x03)
             {
-                adc_amp_bus= (adc_amp_un[1] + adc_amp_un[2])*ADC2CURT;   /* VW */
+                adc_amp_bus= (adc_amp_un[1]+ adc_amp_un[2])*ADC2CURT;/* VW */
             }
-            else if(g_bldc_motor1.step_sta == 0x02)
+            else if(g_bldc_motor1.step_sta== 0x02)
             {
-                adc_amp_bus= (adc_amp_un[0] + adc_amp_un[1])*ADC2CURT;   /* UV */
+                adc_amp_bus= (adc_amp_un[0]+ adc_amp_un[1])*ADC2CURT;/* UV */
             }
             else if(g_bldc_motor1.step_sta == 0x06)
             {
-                adc_amp_bus= (adc_amp_un[0] + adc_amp_un[2])*ADC2CURT;   /* WU */
+                adc_amp_bus= (adc_amp_un[0]+ adc_amp_un[2])*ADC2CURT;/* WU */
             }
             else if(g_bldc_motor1.step_sta == 0x04)
             {
-                adc_amp_bus= (adc_amp_un[2] + adc_amp_un[1])*ADC2CURT;   /* WV */
-            }         
+                adc_amp_bus= (adc_amp_un[2]+ adc_amp_un[1])*ADC2CURT;/* WV */
+            }
         }
-#endif
     }
     else if(htim->Instance == TIM6)
     {
-        /* 计算未开始启动时的基准电压 */
+        /******************************* 采集电机停机状态下的偏置电压 *******************************/
         times_count++;
         if(g_bldc_motor1.run_flag == STOP)
         {
             uint8_t i;
             uint32_t avg[3] = {0,0,0};
-            adc_amp_offset[0][adc_amp_offset_p] = g_adc_val[2];     /* 获取电机停机状态下的三相电流 U */
-            adc_amp_offset[1][adc_amp_offset_p] = g_adc_val[3];     /* V */
-            adc_amp_offset[2][adc_amp_offset_p] = g_adc_val[4];     /* W */
+            adc_amp_offset[0][adc_amp_offset_p] = g_adc_val[2];     /* 获取电机停机状态下的三相电流 */
+            adc_amp_offset[1][adc_amp_offset_p] = g_adc_val[3];
+            adc_amp_offset[2][adc_amp_offset_p] = g_adc_val[4];
+
             adc_amp_offset_p ++;
-            NUM_CLEAR(adc_amp_offset_p,ADC_AMP_OFFSET_TIMES);       /* 如果溢出，从头开始计数 */
-            for(i = 0; i < ADC_AMP_OFFSET_TIMES; i++)
+            NUM_CLEAR(adc_amp_offset_p,ADC_AMP_OFFSET_TIMES);
+            for(i=0; i<ADC_AMP_OFFSET_TIMES; i++)
             {
                 avg[0] += adc_amp_offset[0][i];                     /* 各相数值累加 */
                 avg[1] += adc_amp_offset[1][i];
                 avg[2] += adc_amp_offset[2][i];
             }
-            for(i = 0; i < 3; i++)
+            for(i=0; i<3; i++)
             {
                 avg[i] /= ADC_AMP_OFFSET_TIMES;                     /* 取平均 */
                 adc_amp_offset[i][ADC_AMP_OFFSET_TIMES] = avg[i];   /* 赋值 */

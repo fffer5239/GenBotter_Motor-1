@@ -119,6 +119,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim1);
   HAL_TIM_Base_Start_IT(&htim6);  // 启动TIM6中断,ADC采集
   adc_nch_dma_init();
+  pid_init();
   lcd_show_string(10, 50, 300, 32, 32, "GenBotter-Motor-1", RED);
   lcd_show_string(10, 85, 450, 24, 24, "Chap06_LCD_KEY_LED_TempPro", BLUE);
   printf("Hello World!\n");
@@ -142,13 +143,12 @@ int main(void)
     t++;
     if(t % 200 == 0)
     {
-        // sprintf(buf,"PWM_Duty:%.1f%%",(float)((g_bldc_motor1.pwm_duty/MAX_PWM_DUTY)*100));/* 显示控制PWM占空比 */
-        // lcd_show_string(10,150,200,16,16,buf,g_point_color);
-        sprintf(buf,"g_speed_pid.SetPoint:%.1f",(float)g_speed_pid.SetPoint);
-        lcd_show_string(10,150,200,16,16,buf,g_point_color);
+
+        sprintf(buf,"g_speed_pid.SetPoint:%.1f,pwm_duty:%d",
+          (float)g_speed_pid.SetPoint,g_bldc_motor1.pwm_duty);
+        lcd_show_string(10,150,400,16,16,buf,g_point_color);
         sprintf(buf,"Power:%.3fV ",g_adc_val[0]*ADC2VBUS);
         lcd_show_string(10,170,200,16,16,buf,g_point_color);
-        // printf("ADC[1]=%d\r\n", g_adc_val[1]);
         sprintf(buf,"Temp:%.1fC ",get_temp(g_adc_val[1]));
         lcd_show_string(10,190,200,16,16,buf,g_point_color);           
         
@@ -192,18 +192,20 @@ int main(void)
         // printf("\r\n");
         Led_Toggle(LED1);                          /* LED1(红灯) 翻转 */
     }
+
     key_id = Key_Scan();
     if(key_id == KEY0_Pressed)
     { 
             lcd_show_string(10, 115, 200, 24, 24, "key 0 pressed.", BLUE);  
             g_bldc_motor1.run_flag = RUN;   /* 开启运行 */
+            g_bldc_motor1.dir = CW;         /* 顺时针旋转 */
             start_motor1();                 /* 开启运行 */
             if(*user_setpoint == 0 && g_bldc_motor1.dir == CCW)
             {
                 pid_init();                 /* 换向时刻，重新初始化PID，防止速度突变 */
                 g_bldc_motor1.dir = CW;
             }
-
+            
             *user_setpoint += 400;          /* 顺时针旋转下递增 */
             if(*user_setpoint >= 4000)
                 *user_setpoint = 4000;
@@ -214,12 +216,14 @@ int main(void)
                 g_bldc_motor1.speed = 0;
                 motor_pwm_s = 0;
                 g_bldc_motor1.pwm_duty = 0;
+                printf("Speed 0\r\n");
             }
     }
     else if(key_id == KEY1_Pressed)
     {
             lcd_show_string(10, 115, 200, 24, 24, "key 1 pressed.", BLUE);
             g_bldc_motor1.run_flag = RUN;   /* 开启运行 */
+            g_bldc_motor1.dir = CCW;        /* 逆时针旋转 */
             start_motor1();                 /* 开启运行 */
             if(*user_setpoint == 0 && g_bldc_motor1.dir == CW)
             {     
@@ -236,6 +240,7 @@ int main(void)
                 g_bldc_motor1.speed = 0;
                 motor_pwm_s = 0;
                 g_bldc_motor1.pwm_duty = 0;
+                printf("Speed 0\r\n");
             }      
     }
     else if(key_id == KEY2_Pressed){
@@ -245,7 +250,6 @@ int main(void)
         pwm_duty_temp = 0;                      /* 数据清0 */
         g_bldc_motor1.pwm_duty = 0;
     }  
-
     
 	}
   /* USER CODE END 3 */
